@@ -4,7 +4,8 @@ import time
 import logging
 import queue
 
-exit_phrase = 'exit app'
+#mechanism to stop the threads
+stop_event = threading.Event()
 
 """
 capture audio and buffer them in a queue
@@ -64,19 +65,17 @@ def continuous_speech_capture(recognizer : sr.Recognizer, audio_q : queue):
     microphone = sr.Microphone()
     with microphone as source:
         recognizer.adjust_for_ambient_noise(source)
-        while True:
+        while not stop_event.is_set():
             audio_capture(recognizer, source, audio_q)
             time.sleep(0.3)
 
 def continuous_speech_processing(recognizer : sr.Recognizer, audio_q : queue, text_q : queue):
-    while True:
+    while not stop_event.is_set():
         audio_transcription(recognizer, audio_q, text_q)
         time.sleep(0.5)
 
-def capture_exit_app_phrase(transcript) -> bool:
-    return transcript == exit_phrase
-
-def transcribe_continuous_speech():
+if __name__ == "__main__":
+    #logging.basicConfig(level=logging.DEBUG)
     recognizer = sr.Recognizer()
     audio_q = queue.Queue()
     text_q = queue.Queue()
@@ -84,16 +83,19 @@ def transcribe_continuous_speech():
     # Create and start the recognition thread
     capture_thread = threading.Thread(target=lambda: continuous_speech_capture(recognizer, audio_q))
     capture_thread.daemon = True  # The thread will exit when the main program exits
+    capture_thread.start()
+
     process_thread = threading.Thread(target=lambda: continuous_speech_processing(recognizer, audio_q, text_q))
     process_thread.daemon = True  # The thread will exit when the main program exits
-
-    capture_thread.start()
     process_thread.start()
+
+    try:
+        while True:
+            time.sleep(100)
+            pass
+    except KeyboardInterrupt:
+        stop_event.set()
 
     capture_thread.join()
     process_thread.join()
-
-if __name__ == "__main__":
-    #logging.basicConfig(level=logging.DEBUG)
-    transcribe_continuous_speech()
     print('App exiting phrase captured')
