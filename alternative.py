@@ -1,11 +1,15 @@
 import speech_recognition as sr
 import threading
 import time
-import logging
 import queue
 import openai
 import numpy as np
 from scipy.linalg import svd
+from capture import audio_capture
+from transcribe import audio_transcription
+from response import consume_text
+
+OPENAI_API_KEY = ''
 
 #mechanism to stop the threads
 stop_event = threading.Event()
@@ -16,83 +20,6 @@ def process_audio(audio_data):
     selected_track = U[:, 0] * S[0] * V[0, :]
     selected_audio_data = sr.AudioData(selected_track.tostring(), audio_data.sample_rate, audio_data.sample_width)
     return selected_audio_data
-    
-"""
-capture audio and buffer them in a queue
-"""
-def audio_capture(recognizer : sr.Recognizer, source : sr.AudioSource, audio_q : queue) -> sr.AudioData:
-    if not isinstance(recognizer, sr.Recognizer):
-        raise Exception(f'{recognizer} is not type of {sr.Recognizer}')
-    if not isinstance(source, sr.AudioSource):
-        raise Exception(f'{source} is not type of {sr.AudioSource}')
-    if not isinstance(audio_q, queue.Queue):
-        raise Exception(f'{audio_q} is not type of {queue.Queue}')
-    
-    #to do: put a limit on the queue, and dequeue the oldest audio when the size of queue reaches that limit
-    #perhaps this should be done with a custom queue object that manages the queue by size etc.
-    print('Listening for speech...')
-    audio = None
-    try:
-        audio = recognizer.listen(source)
-        #audio = process_audio(audio)
-        audio_q.put(audio)
-    except Exception:
-        logging.error('Unknown error with audio capturing')
-        
-
-"""
-transcribe the audio captured and stored in the queue and have the result placed in the text queue
-problem: need to figure out how to exit app asap (text is queued so this isn't processed immediately)
-"""
-def audio_transcription(recognizer : sr.Recognizer, audio_q : queue, text_q : queue):
-    if not isinstance(recognizer, sr.Recognizer):
-        raise Exception(f'{recognizer} is not type of {sr.Recognizer}')
-    if not isinstance(audio_q, queue.Queue):
-        raise Exception(f'{audio_q} is not type of {queue.Queue}')
-    if not isinstance(text_q, queue.Queue):
-        raise Exception(f'{text_q} is not type of {queue.Queue}')
-    
-    if audio_q.empty():
-        return
-    
-    transcript = ''
-    try:
-        print(f'Transcribing... {audio_q.qsize()} remaining...')
-        audio = audio_q.get()
-        if not isinstance(audio, sr.AudioData):
-            raise Exception(f'{audio} is not type of {sr.AudioData}')
-        transcript = recognizer.recognize_google(audio, language="en-US")
-        if transcript:
-            text_q.put(transcript)
-        print(f"Transcript: {transcript}")
-    except sr.UnknownValueError:
-        logging.error("Google Web Speech API could not understand the audio")
-    except sr.RequestError as e:
-        logging.error("Could not request results from Google Web Speech API; {0}".format(e))
-    except KeyboardInterrupt:
-        logging.info("Stopping the speech recognition.")
-
-def consume_text(text_q : queue.Queue):
-    if not isinstance(text_q, queue.Queue):
-        raise Exception(f'{text_q} is not type of {queue.Queue}')
-
-    if text_q.empty():
-        return
-    
-    print(f'aggregating {text_q.qsize()} number of messages')
-    texts = []
-    while not text_q.empty():
-        texts.append(text_q.get())
-    
-    prompt = " ".join(texts)
-    if not prompt:
-        return
-    
-    response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo", 
-                messages=[{"role": "user", "content": prompt}])
-    message = response["choices"][0]["message"]["content"]
-    print(message)
 
 def continuous_speech_capture(recognizer : sr.Recognizer, audio_q : queue):
     microphone = sr.Microphone()
@@ -108,7 +35,7 @@ def continuous_speech_processing(recognizer : sr.Recognizer, audio_q : queue, te
         time.sleep(0.5)
 
 def continuous_llm_response(text_q : queue.Queue):
-    openai.api_key = "api-key"
+    openai.api_key = OPENAI_API_KEY
     while not stop_event.is_set():
         consume_text(text_q)
         time.sleep(0.7)
