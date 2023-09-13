@@ -3,10 +3,36 @@ import threading
 import time
 import logging
 import queue
+import openai
 
 #mechanism to stop the threads
 stop_event = threading.Event()
 
+class Bot:
+    def __init__(self) -> None:
+        openai.api_key = "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"
+
+    def Generate(self, prompt):
+        return openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo", 
+                    messages=[{"role": "user", "content": prompt}]
+                )
+    
+    def Parse(self, response):
+        return response["choices"][0]["message"]["content"]
+    
+    def ParsedMessage(self, prompt):
+        return self.Parse(self.Generate(prompt))
+    
+    def SetupMessageQueue(self, q):
+        self.q = q
+
+    def SetupState(self, state):
+        self.state = state
+
+    def ShouldStop(self):
+        return self.state.Stopped
+    
 """
 capture audio and buffer them in a queue
 """
@@ -61,6 +87,24 @@ def audio_transcription(recognizer : sr.Recognizer, audio_q : queue, text_q : qu
     except KeyboardInterrupt:
         logging.info("Stopping the speech recognition.")
 
+def consume_text(text_q : queue.Queue):
+    if not isinstance(text_q, queue.Queue):
+        raise Exception(f'{text_q} is not type of {queue.Queue}')
+
+    texts = []
+    while not text_q.empty():
+        texts.append(text_q.get())
+    
+    prompt = " ".join(texts)
+    if not prompt:
+        return
+    
+    response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo", 
+                messages=[{"role": "user", "content": prompt}])
+    message = response["choices"][0]["message"]["content"]
+    print(message)
+
 def continuous_speech_capture(recognizer : sr.Recognizer, audio_q : queue):
     microphone = sr.Microphone()
     with microphone as source:
@@ -73,6 +117,12 @@ def continuous_speech_processing(recognizer : sr.Recognizer, audio_q : queue, te
     while not stop_event.is_set():
         audio_transcription(recognizer, audio_q, text_q)
         time.sleep(0.5)
+
+def continuous_llm_response(text_q : queue.Queue):
+    openai.api_key = "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"
+    while not stop_event.is_set():
+        consume_text(text_q)
+        time.sleep(5)
 
 if __name__ == "__main__":
     #logging.basicConfig(level=logging.DEBUG)
@@ -89,6 +139,10 @@ if __name__ == "__main__":
     process_thread.daemon = True  # The thread will exit when the main program exits
     process_thread.start()
 
+    response_thread = threading.Thread(target=lambda: continuous_llm_response(text_q))
+    response_thread.daemon = True
+    response_thread.start()
+
     try:
         while True:
             time.sleep(100)
@@ -98,4 +152,6 @@ if __name__ == "__main__":
 
     capture_thread.join()
     process_thread.join()
+    response_thread.join()
+
     print('App exiting phrase captured')
