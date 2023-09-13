@@ -21,7 +21,7 @@ def recognition(recognizer, source) -> str:
         logging.error("Could not request results from Google Web Speech API; {0}".format(e))
     except KeyboardInterrupt:
         logging.info("Stopping the speech recognition.")
-        
+
     return transcript
 
 def continuous_speech_recognition(recognizer, microphone):
@@ -34,15 +34,15 @@ def continuous_speech_recognition(recognizer, microphone):
         recognizer.adjust_for_ambient_noise(source)
         while not capture_exit_app_phrase(transcript):
             print('Listening for speech...')
-            time.sleep(1)
             transcript = recognition(recognizer, source)
+            time.sleep(1)
 
 def transcribe_continuous_speech():
     recognizer = sr.Recognizer()
     microphone = sr.Microphone()
 
     # Create and start the recognition thread
-    thread = threading.Thread(target=continuous_speech_recognition(recognizer, microphone))
+    thread = threading.Thread(target=lambda:continuous_speech_recognition(recognizer, microphone))
     thread.daemon = True  # The thread will exit when the main program exits
     return thread
 
