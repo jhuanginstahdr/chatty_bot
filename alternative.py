@@ -4,34 +4,18 @@ import time
 import logging
 import queue
 import openai
+import numpy as np
+from scipy.linalg import svd
 
 #mechanism to stop the threads
 stop_event = threading.Event()
 
-class Bot:
-    def __init__(self) -> None:
-        openai.api_key = "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"
-
-    def Generate(self, prompt):
-        return openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo", 
-                    messages=[{"role": "user", "content": prompt}]
-                )
-    
-    def Parse(self, response):
-        return response["choices"][0]["message"]["content"]
-    
-    def ParsedMessage(self, prompt):
-        return self.Parse(self.Generate(prompt))
-    
-    def SetupMessageQueue(self, q):
-        self.q = q
-
-    def SetupState(self, state):
-        self.state = state
-
-    def ShouldStop(self):
-        return self.state.Stopped
+def process_audio(audio_data):
+    audio_array = np.frombuffer(audio_data.frame_data, dtype=np.int16)
+    U, S, V = svd(audio_array, full_matrices=False)
+    selected_track = U[:, 0] * S[0] * V[0, :]
+    selected_audio_data = sr.AudioData(selected_track.tostring(), audio_data.sample_rate, audio_data.sample_width)
+    return selected_audio_data
     
 """
 capture audio and buffer them in a queue
@@ -50,9 +34,10 @@ def audio_capture(recognizer : sr.Recognizer, source : sr.AudioSource, audio_q :
     audio = None
     try:
         audio = recognizer.listen(source)
+        #audio = process_audio(audio)
         audio_q.put(audio)
     except Exception:
-        logging.log('Unknown error with audio capturing')
+        logging.error('Unknown error with audio capturing')
         
 
 """
@@ -91,6 +76,10 @@ def consume_text(text_q : queue.Queue):
     if not isinstance(text_q, queue.Queue):
         raise Exception(f'{text_q} is not type of {queue.Queue}')
 
+    if text_q.empty():
+        return
+    
+    print(f'aggregating {text_q.qsize()} number of messages')
     texts = []
     while not text_q.empty():
         texts.append(text_q.get())
@@ -119,10 +108,10 @@ def continuous_speech_processing(recognizer : sr.Recognizer, audio_q : queue, te
         time.sleep(0.5)
 
 def continuous_llm_response(text_q : queue.Queue):
-    openai.api_key = "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"
+    openai.api_key = "api-key"
     while not stop_event.is_set():
         consume_text(text_q)
-        time.sleep(5)
+        time.sleep(0.7)
 
 if __name__ == "__main__":
     #logging.basicConfig(level=logging.DEBUG)
