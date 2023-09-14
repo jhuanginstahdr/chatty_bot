@@ -8,7 +8,7 @@ from transcription import AudioTranscript
 from response import ResponseFromOpenAI
 
 """
-A demonstration of how the three services: capture, transcription and response work together
+A demo on how the three services: capture, transcription and response work together
 to feed speech (in English) as prompt to a Large-Language-Model like OpenAI's GPT
 """
 def direct_speech_to_text_to_llm() -> None:
