@@ -20,7 +20,7 @@ class AudioTranscript:
     Continuous audio transcription
 
     Args:
-        get_audio_data (method) : responsible for returning audio data for transcription
+        get_audio_data (function) : responsible for returning audio data for transcription
         process_transcript (method) : responsible for consuming transcript
         stop_event (threading.Event) : mechanism that stops the continuous transcription
 
