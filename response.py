@@ -16,7 +16,7 @@ def consume_text(text_q : queue.Queue):
     while not text_q.empty():
         texts.append(text_q.get())
     
-    prompt = " ".join(texts)
+    prompt = improve_content(" ".join(texts))
     if not prompt:
         return
     
@@ -25,3 +25,9 @@ def consume_text(text_q : queue.Queue):
                 messages=[{"role": "user", "content": prompt}])
     message = response["choices"][0]["message"]["content"]
     print(message)
+
+def zero_shot(transcript : str) -> str:
+    return transcript
+
+def improve_content(transcript : str) -> str:
+    return f'Please focus on coding related tasks and neglect anything unrelated to coding: {transcript}'
