@@ -37,6 +37,7 @@ class AudioCapture:
         if not isinstance(stop_event, Event):
             raise Exception(f'{stop_event} is not of type {Event}')
         
+        logging.info('Listening for speech...')
         with self.microphone as source:
             self.recognizer.adjust_for_ambient_noise(source)
             while not stop_event.is_set():
@@ -61,7 +62,6 @@ class AudioCapture:
         if not isinstance(source, AudioSource):
             raise Exception(f'{source} is not type of {AudioSource}')
         
-        logging.info('Listening for speech...')
         try:
             return recognizer.listen(source, timeout=2)
         except WaitTimeoutError:
