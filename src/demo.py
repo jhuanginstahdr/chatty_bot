@@ -1,8 +1,7 @@
 from speech_recognition import Recognizer, Microphone
 from threading import Thread, Event, enumerate as thread_enumerate
 from queue import Queue
-import time
-import os
+import time, os, logging
 
 from capture import AudioCapture
 from transcription import AudioTranscription
@@ -23,6 +22,7 @@ def direct_speech_to_text_to_llm() -> None:
     # store the captured audio data in audio_q
     def put_in_audio_queue(audio):
         if audio is not None:
+            logging.debug(f'putting audio in audio_q')
             audio_q.put(audio)
 
     # retrive an audio data from audio_q
@@ -32,22 +32,25 @@ def direct_speech_to_text_to_llm() -> None:
     # store the transcript in text_q
     def put_in_text_queue(text):
         if text:
+            logging.debug(f'putting {text} in text_q')
             text_q.put(text)
-            print(text)
 
     # retrieve all texts from text_q and join them to form a prompt
-    def create_prompt_from_text_queue():
+    def create_prompt_from_text_queue() -> str:
         if text_q.empty():
             return None
+        logging.debug(f'constructing prompt from text_q')
         list = []
         while not text_q.empty():
             list.append(text_q.get(timeout=1))
-        return " ".join(list)
+        prompt = " ".join(list)
+        logging.info(f'prompt: {prompt}')
+        return prompt
     
     # print out the response
     def print_response(text : str):
         if text:
-            print(f'response: {text}')
+            logging.info(f'response: {text}')
 
     #a thread for audio capture
     capture = AudioCapture(recognizer, Microphone())
@@ -78,6 +81,6 @@ def direct_speech_to_text_to_llm() -> None:
         thread.join()
 
 if __name__ == "__main__":
-    #logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     direct_speech_to_text_to_llm()
     print('App has exited')
