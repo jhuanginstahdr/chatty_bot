@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 class ResponseGenerator(ABC):
     @abstractmethod
-    def GetResponse(prompt : str) -> str :
+    def QueryOnce(prompt : str) -> str :
         pass
 
 import openai
@@ -32,7 +32,7 @@ class ResponseFromOpenAI(ResponseGenerator):
     Returns:
         response from OpenAI's LLM
     """
-    def GetResponse(self, prompt: str) -> str:
+    def QueryOnce(self, prompt: str) -> str:
         if not prompt:
             return None
         response = openai.ChatCompletion.create(
@@ -50,7 +50,7 @@ class ResponseFromOpenAI(ResponseGenerator):
     Returns:
         None
     """
-    def ContinousResponse(self, get_prompt : callable, process_response : callable, stop_event : threading.Event, sleep=1) -> None:
+    def Query(self, get_prompt : callable, process_response : callable, stop_event : threading.Event, sleep=1) -> None:
         if not callable(get_prompt):
             raise Exception(f'{get_prompt} is not callable')
         if not callable(process_response):
@@ -60,6 +60,6 @@ class ResponseFromOpenAI(ResponseGenerator):
         
         while not stop_event.is_set():
             prompt = get_prompt()
-            response = self.GetResponse(prompt)
+            response = self.QueryOnce(prompt)
             process_response(response)
             time.sleep(sleep)

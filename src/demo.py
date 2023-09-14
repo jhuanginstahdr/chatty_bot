@@ -63,7 +63,7 @@ def direct_speech_to_text_to_llm() -> None:
 
     #thread for feeding prompt and getting responses via OpenAI's API
     response = ResponseFromOpenAI(os.environ.get('OPENAI_API_KEY'))
-    response_thread = Thread(target=lambda: response.ContinousResponse(create_prompt_from_text_queue, print_response, stop_event, 0.1))
+    response_thread = Thread(target=lambda: response.Query(create_prompt_from_text_queue, print_response, stop_event, 0.1))
     response_thread.daemon = True
     response_thread.start()
 
