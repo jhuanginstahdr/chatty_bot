@@ -63,7 +63,7 @@ class AudioCapture:
             raise Exception(f'{source} is not type of {AudioSource}')
         
         try:
-            return recognizer.listen(source, timeout=2)
+            return recognizer.listen(source)
         except WaitTimeoutError:
             logging.error('Wait timeout')
         except Exception:
