@@ -14,6 +14,7 @@ class AudioTranscript:
     def __init__(self, recognizer : Recognizer):
         if not isinstance(recognizer, Recognizer):
             raise Exception(f'{recognizer} is not type of {Recognizer}')
+        
         self.recognizer = recognizer
 
     """

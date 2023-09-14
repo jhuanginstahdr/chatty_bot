@@ -3,6 +3,7 @@ from threading import Thread, Event, enumerate as thread_enumerate
 from queue import Queue
 import time
 import os
+
 from capture import AudioCapture
 from transcription import AudioTranscript
 from response import ResponseFromOpenAI

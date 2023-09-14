@@ -17,6 +17,7 @@ class AudioCapture:
             raise Exception(f'{recognizer} is not type of {Recognizer}')
         if not isinstance(microphone, Microphone):
             raise Exception(f'{microphone} is not type of {Microphone}')
+        
         self.recognizer = recognizer
         self.microphone = microphone
 

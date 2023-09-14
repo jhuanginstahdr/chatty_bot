@@ -18,6 +18,9 @@ class ResponseFromOpenAI(ResponseGenerator):
         api_key (str) : required for using OpenAI's API
     """
     def __init__(self, api_key : str):
+        if not isinstance(api_key, str):
+            raise Exception(f'{api_key} is not of type {str}')
+        
         openai.api_key = api_key
 
     """
