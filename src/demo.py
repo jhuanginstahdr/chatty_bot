@@ -72,9 +72,8 @@ def direct_speech_to_text_to_llm() -> None:
     except KeyboardInterrupt:
         stop_event.set()
 
-    capture_thread.join()
-    transcript_thread.join()
-    response_thread.join()
+    for thread in threading.enumerate():
+        thread.join()
 
 if __name__ == "__main__":
     #logging.basicConfig(level=logging.DEBUG)
