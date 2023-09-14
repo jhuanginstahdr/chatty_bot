@@ -3,41 +3,62 @@ import threading
 import time
 import queue
 import openai
-import numpy as np
-from scipy.linalg import svd
 from capture import audio_capture
 from transcribe import audio_transcription
-from response import consume_text
+from response import generate_response
 
 OPENAI_API_KEY = ''
 
 #mechanism to stop the threads
 stop_event = threading.Event()
 
-def process_audio(audio_data):
-    audio_array = np.frombuffer(audio_data.frame_data, dtype=np.int16)
-    U, S, V = svd(audio_array, full_matrices=False)
-    selected_track = U[:, 0] * S[0] * V[0, :]
-    selected_audio_data = sr.AudioData(selected_track.tostring(), audio_data.sample_rate, audio_data.sample_width)
-    return selected_audio_data
-
 def continuous_speech_capture(recognizer : sr.Recognizer, audio_q : queue):
+    if not isinstance(audio_q, queue.Queue):
+        raise Exception(f'{audio_q} is not of type {queue.Queue}')
+    
     microphone = sr.Microphone()
     with microphone as source:
         recognizer.adjust_for_ambient_noise(source)
         while not stop_event.is_set():
-            audio_capture(recognizer, source, audio_q)
+            audio = audio_capture(recognizer, source, audio_q)
+            if audio is not None:
+                audio_q.put(audio)
             time.sleep(0.3)
 
 def continuous_speech_processing(recognizer : sr.Recognizer, audio_q : queue, text_q : queue):
+    if not isinstance(audio_q, queue.Queue):
+        raise Exception(f'{audio_q} is not type of {queue.Queue}')
+    if not isinstance(text_q, queue.Queue):
+        raise Exception(f'{text_q} is not type of {queue.Queue}')
+    
     while not stop_event.is_set():
-        audio_transcription(recognizer, audio_q, text_q)
+        if audio_q.empty():
+            continue
+        audio = audio_q.get()
+        if not isinstance(audio, sr.AudioData):
+            raise Exception(f'{audio} is not type of {sr.AudioData}')
+        transcript = audio_transcription(recognizer, audio)
+        if transcript:
+            text_q.put(transcript)
+            print(f"Transcript: {transcript}")
         time.sleep(0.5)
 
 def continuous_llm_response(text_q : queue.Queue):
+    if not isinstance(text_q, queue.Queue):
+        raise Exception(f'{text_q} is not type of {queue.Queue}')
+    
     openai.api_key = OPENAI_API_KEY
     while not stop_event.is_set():
-        consume_text(text_q)
+        if text_q.empty():
+            continue
+        print(f'aggregating {text_q.qsize()} number of messages')
+        texts = []
+        while not text_q.empty():
+            texts.append(text_q.get())
+        prompt = " ".join(texts)
+        if not prompt:
+            return
+        generate_response(text_q)
         time.sleep(0.7)
 
 if __name__ == "__main__":
