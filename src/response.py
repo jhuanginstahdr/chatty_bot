@@ -11,6 +11,12 @@ import time
 
 class ResponseFromOpenAI(ResponseGenerator):
 
+    """
+    Cosntructor of ResponseFromOpenAI
+
+    Args:
+        api_key (str) : required for using OpenAI's API
+    """
     def __init__(self, api_key : str):
         openai.api_key = api_key
 
