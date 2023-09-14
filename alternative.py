@@ -3,11 +3,12 @@ import threading
 import time
 import queue
 import openai
+import os
 from capture import audio_capture
 from transcribe import audio_transcription
 from response import generate_response
 
-OPENAI_API_KEY = ''
+api_key = os.environ.get('OPENAI_API_KEY')
 
 #mechanism to stop the threads
 stop_event = threading.Event()
@@ -44,10 +45,7 @@ def continuous_speech_processing(recognizer : sr.Recognizer, audio_q : queue, te
         time.sleep(0.5)
 
 def continuous_llm_response(text_q : queue.Queue):
-    if not isinstance(text_q, queue.Queue):
-        raise Exception(f'{text_q} is not type of {queue.Queue}')
-    
-    openai.api_key = OPENAI_API_KEY
+    openai.api_key = api_key
     while not stop_event.is_set():
         if text_q.empty():
             continue

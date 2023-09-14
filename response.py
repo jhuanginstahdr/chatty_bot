@@ -10,3 +10,9 @@ def generate_response(prompt : str):
                 messages=[{"role": "user", "content": prompt}])
     message = response["choices"][0]["message"]["content"]
     print(message)
+
+def zero_shot(transcript : str) -> str:
+    return transcript
+
+def improve_content(transcript : str) -> str:
+    return f'Please focus on coding related tasks and neglect anything unrelated to coding: {transcript}'
