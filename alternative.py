@@ -3,23 +3,15 @@ import threading
 import time
 import queue
 import openai
-import numpy as np
-from scipy.linalg import svd
+import os
 from capture import audio_capture
 from transcribe import audio_transcription
 from response import consume_text
 
-OPENAI_API_KEY = ''
+api_key = os.environ.get('OPENAI_API_KEY')
 
 #mechanism to stop the threads
 stop_event = threading.Event()
-
-def process_audio(audio_data):
-    audio_array = np.frombuffer(audio_data.frame_data, dtype=np.int16)
-    U, S, V = svd(audio_array, full_matrices=False)
-    selected_track = U[:, 0] * S[0] * V[0, :]
-    selected_audio_data = sr.AudioData(selected_track.tostring(), audio_data.sample_rate, audio_data.sample_width)
-    return selected_audio_data
 
 def continuous_speech_capture(recognizer : sr.Recognizer, audio_q : queue):
     microphone = sr.Microphone()
@@ -35,7 +27,7 @@ def continuous_speech_processing(recognizer : sr.Recognizer, audio_q : queue, te
         time.sleep(0.5)
 
 def continuous_llm_response(text_q : queue.Queue):
-    openai.api_key = OPENAI_API_KEY
+    openai.api_key = api_key
     while not stop_event.is_set():
         consume_text(text_q)
         time.sleep(0.7)
