@@ -31,7 +31,7 @@ class AudioCapture:
     Returns:
         None
     """
-    def ContinuousCapture(self, process_audio : callable, stop_event : Event, sleep = 1) -> None:
+    def Capture(self, process_audio : callable, stop_event : Event, sleep = 1) -> None:
         if not callable(process_audio):
             raise Exception(f'{process_audio} is not callable')
         if not isinstance(stop_event, Event):

@@ -5,7 +5,7 @@ import time
 import os
 
 from capture import AudioCapture
-from transcription import AudioTranscript
+from transcription import AudioTranscription
 from response import ResponseFromOpenAI
 
 """
@@ -21,22 +21,22 @@ def direct_speech_to_text_to_llm() -> None:
     text_q = Queue()
 
     # store the captured audio data in audio_q
-    def queue_audio(audio):
+    def put_in_audio_queue(audio):
         if audio is not None:
             audio_q.put(audio)
 
     # retrive an audio data from audio_q
-    def dequeue_audio():
+    def get_from_audio_queue():
         return None if audio_q.empty() else audio_q.get(timeout=1)
     
     # store the transcript in text_q
-    def queue_text(text):
+    def put_in_text_queue(text):
         if text:
             text_q.put(text)
             print(text)
 
     # retrieve all texts from text_q and join them to form a prompt
-    def dequeue_text_for_prompt():
+    def create_prompt_from_text_queue():
         if text_q.empty():
             return None
         list = []
@@ -51,19 +51,19 @@ def direct_speech_to_text_to_llm() -> None:
 
     #a thread for audio capture
     capture = AudioCapture(recognizer, Microphone())
-    capture_thread = Thread(target=lambda: capture.ContinuousCapture(queue_audio, stop_event, 0.1))
+    capture_thread = Thread(target=lambda: capture.Capture(put_in_audio_queue, stop_event, 0.1))
     capture_thread.daemon = True
     capture_thread.start()
 
     #thread for audio trancription
-    transcript = AudioTranscript(recognizer)
-    transcript_thread = Thread(target=lambda: transcript.ContinuousAudioDataTranscription(dequeue_audio, queue_text, stop_event, 0.1))
+    transcript = AudioTranscription(recognizer)
+    transcript_thread = Thread(target=lambda: transcript.Transcribe(get_from_audio_queue, put_in_text_queue, stop_event, 0.1))
     transcript_thread.daemon = True
     transcript_thread.start()
 
     #thread for feeding prompt and getting responses via OpenAI's API
     response = ResponseFromOpenAI(os.environ.get('OPENAI_API_KEY'))
-    response_thread = Thread(target=lambda: response.ContinousResponse(dequeue_text_for_prompt, print_response, stop_event, 0.1))
+    response_thread = Thread(target=lambda: response.ContinousResponse(create_prompt_from_text_queue, print_response, stop_event, 0.1))
     response_thread.daemon = True
     response_thread.start()
 

@@ -3,7 +3,7 @@ from threading import Event
 import logging
 import time
 
-class AudioTranscript:
+class AudioTranscription:
 
     """
     Cosntructor of AudioTranscript
@@ -28,7 +28,7 @@ class AudioTranscript:
     Returns:
         None
     """
-    def ContinuousAudioDataTranscription(self, get_audio_data : callable, process_transcript : callable, stop_event : Event, sleep = 1) -> None:
+    def Transcribe(self, get_audio_data : callable, process_transcript : callable, stop_event : Event, sleep = 1) -> None:
         if not callable(get_audio_data):
             raise Exception(f'{get_audio_data} is not callable')
         if not callable(process_transcript):
@@ -42,7 +42,7 @@ class AudioTranscript:
                 continue
             if not isinstance(audio, AudioData):
                 raise Exception(f'{audio} is not type of {AudioData}')
-            transcript = AudioTranscript.TranscribeOnce(self.recognizer, audio)
+            transcript = AudioTranscription.TranscribeOnce(self.recognizer, audio)
             process_transcript(transcript)
             time.sleep(sleep)
 
