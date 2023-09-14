@@ -1,7 +1,7 @@
-import speech_recognition as sr
+from speech_recognition import Recognizer, Microphone, AudioData, AudioSource
+from threading import Event
 import logging
 import time
-import threading
 
 class AudioCapture:
 
@@ -9,14 +9,14 @@ class AudioCapture:
     Cosntructor of AudioCapture
 
     Args:
-        recognizer (sr.Recognizer) : object required for capturing audio data
-        microphone (sr.Microphone) : device for capturing audio data
+        recognizer (Recognizer) : object required for capturing audio data
+        microphone (Microphone) : device for capturing audio data
     """
-    def __init__(self, recognizer : sr.Recognizer, microphone : sr.Microphone):
-        if not isinstance(recognizer, sr.Recognizer):
-            raise Exception(f'{recognizer} is not type of {sr.Recognizer}')
-        if not isinstance(microphone, sr.Microphone):
-            raise Exception(f'{microphone} is not type of {sr.Microphone}')
+    def __init__(self, recognizer : Recognizer, microphone : Microphone):
+        if not isinstance(recognizer, Recognizer):
+            raise Exception(f'{recognizer} is not type of {Recognizer}')
+        if not isinstance(microphone, Microphone):
+            raise Exception(f'{microphone} is not type of {Microphone}')
         self.recognizer = recognizer
         self.microphone = microphone
 
@@ -25,16 +25,16 @@ class AudioCapture:
 
     Args:
         process_audio (method) : provided process on top of the captured audio data
-        stop_event (threading.Event) : mechanism that stops the continuous capture
+        stop_event (Event) : mechanism that stops the continuous capture
 
     Returns:
         None
     """
-    def ContinuousCapture(self, process_audio : callable, stop_event : threading.Event, sleep = 1) -> None:
+    def ContinuousCapture(self, process_audio : callable, stop_event : Event, sleep = 1) -> None:
         if not callable(process_audio):
             raise Exception(f'{process_audio} is not callable')
-        if not isinstance(stop_event, threading.Event):
-            raise Exception(f'{stop_event} is not of type {threading.Event}')
+        if not isinstance(stop_event, Event):
+            raise Exception(f'{stop_event} is not of type {Event}')
         
         with self.microphone as source:
             self.recognizer.adjust_for_ambient_noise(source)
@@ -47,18 +47,18 @@ class AudioCapture:
     Captured audio data
 
     Args:
-        recognizer (sr.Recognizer) : object that captures audio data from source
-        source (sr.AudioSource) : the source of audio data
+        recognizer (Recognizer) : object that captures audio data from source
+        source (AudioSource) : the source of audio data
 
     Returns:
         The captured audio data given recognizer and audio source
     """
     @staticmethod
-    def CaptureOnce(recognizer : sr.Recognizer, source : sr.AudioSource) -> sr.AudioData:
-        if not isinstance(recognizer, sr.Recognizer):
-            raise Exception(f'{recognizer} is not type of {sr.Recognizer}')
-        if not isinstance(source, sr.AudioSource):
-            raise Exception(f'{source} is not type of {sr.AudioSource}')
+    def CaptureOnce(recognizer : Recognizer, source : AudioSource) -> AudioData:
+        if not isinstance(recognizer, Recognizer):
+            raise Exception(f'{recognizer} is not type of {Recognizer}')
+        if not isinstance(source, AudioSource):
+            raise Exception(f'{source} is not type of {AudioSource}')
         
         print('Listening for speech...')
         try:

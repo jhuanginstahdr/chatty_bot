@@ -1,7 +1,7 @@
-import speech_recognition as sr
-import threading
+from speech_recognition import Recognizer, Microphone
+from threading import Thread, Event, enumerate as thread_enumerate
+from queue import Queue
 import time
-import queue
 import os
 from capture import AudioCapture
 from transcription import AudioTranscript
@@ -12,11 +12,12 @@ A demo on how the three services: capture, transcription and response work toget
 to feed speech (in English) as prompt to a Large-Language-Model like OpenAI's GPT
 """
 def direct_speech_to_text_to_llm() -> None:
-    recognizer = sr.Recognizer()
-    stop_event = threading.Event()
 
-    audio_q = queue.Queue()
-    text_q = queue.Queue()
+    recognizer = Recognizer()
+    stop_event = Event()
+
+    audio_q = Queue()
+    text_q = Queue()
 
     # store the captured audio data in audio_q
     def queue_audio(audio):
@@ -48,20 +49,20 @@ def direct_speech_to_text_to_llm() -> None:
             print(f'response: {text}')
 
     #a thread for audio capture
-    capture = AudioCapture(recognizer, sr.Microphone())
-    capture_thread = threading.Thread(target=lambda: capture.ContinuousCapture(queue_audio, stop_event, 0.1))
+    capture = AudioCapture(recognizer, Microphone())
+    capture_thread = Thread(target=lambda: capture.ContinuousCapture(queue_audio, stop_event, 0.1))
     capture_thread.daemon = True
     capture_thread.start()
 
     #thread for audio trancription
     transcript = AudioTranscript(recognizer)
-    transcript_thread = threading.Thread(target=lambda: transcript.ContinuousAudioDataTranscription(dequeue_audio, queue_text, stop_event, 0.1))
+    transcript_thread = Thread(target=lambda: transcript.ContinuousAudioDataTranscription(dequeue_audio, queue_text, stop_event, 0.1))
     transcript_thread.daemon = True
     transcript_thread.start()
 
     #thread for feeding prompt and getting responses via OpenAI's API
     response = ResponseFromOpenAI(os.environ.get('OPENAI_API_KEY'))
-    response_thread = threading.Thread(target=lambda: response.ContinousResponse(dequeue_text_for_prompt, print_response, stop_event, 0.1))
+    response_thread = Thread(target=lambda: response.ContinousResponse(dequeue_text_for_prompt, print_response, stop_event, 0.1))
     response_thread.daemon = True
     response_thread.start()
 
@@ -72,7 +73,7 @@ def direct_speech_to_text_to_llm() -> None:
     except KeyboardInterrupt:
         stop_event.set()
 
-    for thread in threading.enumerate():
+    for thread in thread_enumerate():
         thread.join()
 
 if __name__ == "__main__":
