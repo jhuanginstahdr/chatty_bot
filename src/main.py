@@ -3,9 +3,9 @@ from threading import Event, main_thread, enumerate as thread_enumerate
 from queue import Queue
 from time import sleep
 
-from capture import AudioCapture
-from transcription import AudioTranscription
-from response import ResponseFromOpenAI
+from capture_by_speech_recognition import AudioCaptureBySpeechRecognition
+from transcription_by_speech_recognition import AudioTranscriptionBySpeechRecognition
+from response_by_openai import ResponseFromOpenAI
 
 from capture_service import CreateAudioCaptureService
 from transcription_service import CreateAudioTranscriptionService
@@ -23,11 +23,11 @@ def demo_direct_speech_to_text_to_llm() -> None:
     audio_q = Queue(100)
     text_q = Queue(1000)
 
-    capture = AudioCapture(recognizer, Microphone())
+    capture = AudioCaptureBySpeechRecognition(recognizer, Microphone())
     capture_thread = CreateAudioCaptureService(capture, audio_q, stop_event)
     capture_thread.start()
 
-    transcription = AudioTranscription(recognizer)
+    transcription = AudioTranscriptionBySpeechRecognition(recognizer)
     transcription_thread = CreateAudioTranscriptionService(transcription, audio_q, text_q, stop_event)
     transcription_thread.start()
 

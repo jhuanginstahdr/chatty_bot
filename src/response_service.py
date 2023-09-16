@@ -1,13 +1,15 @@
 from threading import Thread, Event
 from queue import Queue, Empty
 from logging import info, debug
-
-from response import ResponseFromOpenAI
+from response import ResponseGenerator
 
 def CreateResponseService(
-    response : ResponseFromOpenAI, 
+    response : ResponseGenerator, 
     text_q : Queue, 
     stop_event : Event) -> Thread:
+
+    if not isinstance(response, ResponseGenerator):
+        raise Exception(f'{response} is not of type {ResponseGenerator}')
 
     # retrieve all texts from text_q and join them to form a prompt
     def create_prompt_from_text_queue() -> str:

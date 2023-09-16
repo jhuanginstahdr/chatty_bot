@@ -10,6 +10,9 @@ def CreateAudioTranscriptionService(
     text_q : Queue, 
     stop_event : Event) -> Thread:
 
+    if not isinstance(transcript, AudioTranscription):
+        raise Exception(f'{transcript} is not of type {AudioTranscription}')
+
     # retrive an audio data from audio_q
     def get_from_audio_queue():
         try:
