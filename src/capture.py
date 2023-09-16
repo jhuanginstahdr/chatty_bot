@@ -1,6 +1,6 @@
 from speech_recognition import Recognizer, Microphone, AudioData, AudioSource, WaitTimeoutError
 from threading import Event
-import logging
+from logging import info, error
 
 class AudioCapture:
 
@@ -36,7 +36,7 @@ class AudioCapture:
         if not isinstance(stop_event, Event):
             raise Exception(f'{stop_event} is not of type {Event}')
         
-        logging.info('Listening for speech...')
+        info('Listening for speech...')
         with self.microphone as source:
             self.recognizer.adjust_for_ambient_noise(source)
             while not stop_event.is_set():
@@ -63,6 +63,6 @@ class AudioCapture:
         try:
             return recognizer.listen(source)
         except WaitTimeoutError:
-            logging.error('Wait timeout')
+            error('Wait timeout')
         except Exception:
-            logging.error('Unknown error with audio capturing')
+            error('Unknown error with audio capturing')

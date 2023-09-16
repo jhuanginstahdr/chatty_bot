@@ -1,6 +1,6 @@
 from speech_recognition import Recognizer, AudioData, UnknownValueError, RequestError
 from threading import Event
-import logging
+from logging import debug, error
 
 class AudioTranscription:
 
@@ -64,8 +64,6 @@ class AudioTranscription:
         try:
             return recognizer.recognize_google(audio, language="en-US")
         except UnknownValueError:
-            logging.error("Google Web Speech API could not understand the audio")
+            debug("Google Web Speech API could not understand the audio")
         except RequestError as e:
-            logging.error(f"Could not request results from Google Web Speech API {e}")
-        except KeyboardInterrupt:
-            logging.info("Stopping the speech recognition.")
+            error(f"Could not request results from Google Web Speech API {e}")
