@@ -6,7 +6,7 @@ class ResponseGenerator(ABC):
         pass
 
 from threading import Event
-from openai import ChatCompletion, api_key
+from openai import ChatCompletion
 
 class ResponseFromOpenAI(ResponseGenerator):
 
@@ -20,7 +20,8 @@ class ResponseFromOpenAI(ResponseGenerator):
         if not isinstance(key, str):
             raise Exception(f'{key} is not of type {str}')
         
-        api_key = key
+        import openai
+        openai.api_key = key
 
     """
     Get response from OpenAI based on the given prompt
