@@ -5,30 +5,33 @@ from transcription import AudioTranscription
 
 class AudioTranscriptionBySpeechRecognition(AudioTranscription):
 
-    """
-    Cosntructor
-
-    Args:
-        recognizer (Recognizer) : object required for transcribing audio data
-    """
     def __init__(self, recognizer : Recognizer):
+        """
+        Constructs an object of AudioTranscription that transcribes audio data by
+        functions provided in speech_recognition package
+
+        Args:
+            recognizer (Recognizer) : object required for transcribing audio data
+        """
         if not isinstance(recognizer, Recognizer):
             raise Exception(f'{recognizer} is not type of {Recognizer}')
         
         self.recognizer = recognizer
 
-    """
-    Continuous audio transcription
-
-    Args:
-        get_audio_data (function) : responsible for returning audio data for transcription
-        process_transcript (method) : responsible for consuming transcript
-        stop_event (Event) : mechanism that stops the continuous transcription
-
-    Returns:
-        None
-    """
     def Transcribe(self, get_audio_data : callable, process_transcript : callable, stop_event : Event) -> None:
+        """
+        Continuous audio transcription in a loop where the loop ends when the stop_event is set.
+        The audio data for transcription is consumed from get_audio_data function and the result
+        of the transcription is consumed by process_transcript method
+
+        Args:
+            get_audio_data (function) : responsible for returning audio data for transcription
+            process_transcript (method) : responsible for consuming transcript
+            stop_event (Event) : mechanism that stops the continuous transcription
+
+        Returns:
+            None
+        """
         if not callable(get_audio_data):
             raise Exception(f'{get_audio_data} is not callable')
         if not callable(process_transcript):
@@ -45,18 +48,19 @@ class AudioTranscriptionBySpeechRecognition(AudioTranscription):
             transcript = AudioTranscriptionBySpeechRecognition.TranscribeOnce(self.recognizer, audio)
             process_transcript(transcript)
 
-    """
-    Transcribe the audio captured
 
-    Args:
-        recognizer (Recognizer) : object required for transcribing audio data
-        audio (AudioData) : audio data for transcription
-
-    Returns:
-        text recognized from audio data
-    """
     @staticmethod
     def TranscribeOnce(recognizer : Recognizer, audio : AudioData) -> str:
+        """
+        Return text (transcript) given a segment of audio data
+
+        Args:
+            recognizer (Recognizer) : object required for transcribing audio data
+            audio (AudioData) : audio data for transcription
+
+        Returns:
+            text transcribed from audio data
+        """
         if not isinstance(recognizer, Recognizer):
             raise Exception(f'{recognizer} is not type of {Recognizer}')
         if not isinstance(audio, AudioData):

@@ -5,14 +5,14 @@ from capture import AudioCapture
 
 class AudioCaptureBySpeechRecognition(AudioCapture):
 
-    """
-    Cosntructor
-
-    Args:
-        recognizer (Recognizer) : object required for capturing audio data
-        microphone (Microphone) : device for capturing audio data
-    """
     def __init__(self, recognizer : Recognizer, microphone : Microphone):
+        """
+        Cosntructs an AudioCapture object for capturing audio data using speech_recognition package
+
+        Args:
+            recognizer (Recognizer) : object required for capturing audio data
+            microphone (Microphone) : device for capturing audio data
+        """
         if not isinstance(recognizer, Recognizer):
             raise Exception(f'{recognizer} is not type of {Recognizer}')
         if not isinstance(microphone, Microphone):
@@ -21,17 +21,18 @@ class AudioCaptureBySpeechRecognition(AudioCapture):
         self.recognizer = recognizer
         self.microphone = microphone
 
-    """
-    Continuous audio capture
-
-    Args:
-        process_audio (method) : provided process on top of the captured audio data
-        stop_event (Event) : mechanism that stops the continuous capture
-
-    Returns:
-        None
-    """
     def Capture(self, process_audio : callable, stop_event : Event) -> None:
+        """
+        Continuous audio capture that feeds audio data to process_audio in a loop. The
+        loop ends when the stop_event is set. 
+
+        Args:
+            process_audio (method) : provided process on top of the captured audio data
+            stop_event (Event) : mechanism that stops the continuous capture
+
+        Returns:
+            None
+        """
         if not callable(process_audio):
             raise Exception(f'{process_audio} is not callable')
         if not isinstance(stop_event, Event):
@@ -44,18 +45,18 @@ class AudioCaptureBySpeechRecognition(AudioCapture):
                 audio = AudioCaptureBySpeechRecognition.CaptureOnce(self.recognizer, source)
                 process_audio(audio)
 
-    """
-    Captured one segment of audio data
-
-    Args:
-        recognizer (Recognizer) : object that captures audio data from source
-        source (AudioSource) : the source of audio data
-
-    Returns:
-        The captured audio data given recognizer and audio source
-    """
     @staticmethod
     def CaptureOnce(recognizer : Recognizer, source : AudioSource) -> AudioData:
+        """
+        Return the captured segment of some audio data
+
+        Args:
+            recognizer (Recognizer) : object that captures audio data from source
+            source (AudioSource) : the source of audio data
+
+        Returns:
+            The captured audio data given recognizer and audio source
+        """
         if not isinstance(recognizer, Recognizer):
             raise Exception(f'{recognizer} is not type of {Recognizer}')
         if not isinstance(source, AudioSource):

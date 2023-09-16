@@ -4,29 +4,29 @@ from response import ResponseGenerator
 
 class ResponseFromOpenAI(ResponseGenerator):
 
-    """
-    Cosntructor
-
-    Args:
-        api_key (str) : required for using OpenAI's API
-    """
     def __init__(self, key : str):
+        """
+        Cosntructs an object of ResponseGenerator that sends a prompt for response from OpenAI's large language model
+
+        Args:
+            key (str) : required for using OpenAI's API
+        """
         if not isinstance(key, str):
             raise Exception(f'{key} is not of type {str}')
         
         import openai
         openai.api_key = key
 
-    """
-    Get response from OpenAI based on the given prompt
-    
-    Args:
-        prompt (str) : query to OpenAI's LLM
-
-    Returns:
-        response from OpenAI's LLM
-    """
     def QueryOnce(self, prompt: str) -> str:
+        """
+        Gets a response from OpenAI based on the given prompt
+        
+        Args:
+            prompt (str) : query to OpenAI's LLM
+
+        Returns:
+            response from OpenAI's LLM
+        """
         if not prompt:
             return None
         response = ChatCompletion.create(
@@ -34,17 +34,18 @@ class ResponseFromOpenAI(ResponseGenerator):
             messages=[{"role": "user", "content": prompt}])
         return response["choices"][0]["message"]["content"]
     
-    """
-    Continuously consume prompts and provide response from OpenAI's LLM
-
-    Args:
-        get_prompt (function) : fetches the prompt
-        process_response (method) : consume the response obtained
-
-    Returns:
-        None
-    """
     def Query(self, get_prompt : callable, process_response : callable, stop_event : Event) -> None:
+        """
+        Continuously consumes prompts in a loop and requests responses from OpenAI's large language model.
+        The loop ends when the stop event is set.
+
+        Args:
+            get_prompt (function) : provides the prompts
+            process_response (method) : consumes the response obtained
+
+        Returns:
+            None
+        """
         if not callable(get_prompt):
             raise Exception(f'{get_prompt} is not callable')
         if not callable(process_response):
