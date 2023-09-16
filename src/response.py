@@ -5,9 +5,8 @@ class ResponseGenerator(ABC):
     def QueryOnce(prompt : str) -> str :
         pass
 
-import openai
-import threading
-import time
+from threading import Event
+from openai import ChatCompletion, api_key
 
 class ResponseFromOpenAI(ResponseGenerator):
 
@@ -17,11 +16,11 @@ class ResponseFromOpenAI(ResponseGenerator):
     Args:
         api_key (str) : required for using OpenAI's API
     """
-    def __init__(self, api_key : str):
-        if not isinstance(api_key, str):
-            raise Exception(f'{api_key} is not of type {str}')
+    def __init__(self, key : str):
+        if not isinstance(key, str):
+            raise Exception(f'{key} is not of type {str}')
         
-        openai.api_key = api_key
+        api_key = key
 
     """
     Get response from OpenAI based on the given prompt
@@ -35,7 +34,7 @@ class ResponseFromOpenAI(ResponseGenerator):
     def QueryOnce(self, prompt: str) -> str:
         if not prompt:
             return None
-        response = openai.ChatCompletion.create(
+        response = ChatCompletion.create(
             model="gpt-3.5-turbo", 
             messages=[{"role": "user", "content": prompt}])
         return response["choices"][0]["message"]["content"]
@@ -50,16 +49,15 @@ class ResponseFromOpenAI(ResponseGenerator):
     Returns:
         None
     """
-    def Query(self, get_prompt : callable, process_response : callable, stop_event : threading.Event, sleep=1) -> None:
+    def Query(self, get_prompt : callable, process_response : callable, stop_event : Event) -> None:
         if not callable(get_prompt):
             raise Exception(f'{get_prompt} is not callable')
         if not callable(process_response):
             raise Exception(f'{process_response} is not callable')
-        if not isinstance(stop_event, threading.Event):
-            raise Exception(f'{stop_event} is not of type {threading.Event}')
+        if not isinstance(stop_event, Event):
+            raise Exception(f'{stop_event} is not of type {Event}')
         
         while not stop_event.is_set():
             prompt = get_prompt()
             response = self.QueryOnce(prompt)
             process_response(response)
-            time.sleep(sleep)

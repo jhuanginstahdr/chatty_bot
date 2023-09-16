@@ -1,7 +1,6 @@
 from speech_recognition import Recognizer, Microphone, AudioData, AudioSource, WaitTimeoutError
 from threading import Event
 import logging
-import time
 
 class AudioCapture:
 
@@ -31,7 +30,7 @@ class AudioCapture:
     Returns:
         None
     """
-    def Capture(self, process_audio : callable, stop_event : Event, sleep = 1) -> None:
+    def Capture(self, process_audio : callable, stop_event : Event) -> None:
         if not callable(process_audio):
             raise Exception(f'{process_audio} is not callable')
         if not isinstance(stop_event, Event):
@@ -43,7 +42,6 @@ class AudioCapture:
             while not stop_event.is_set():
                 audio = AudioCapture.CaptureOnce(self.recognizer, source)
                 process_audio(audio)
-                time.sleep(sleep)
 
     """
     Captured audio data

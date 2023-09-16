@@ -1,7 +1,6 @@
 from speech_recognition import Recognizer, AudioData, UnknownValueError, RequestError
 from threading import Event
 import logging
-import time
 
 class AudioTranscription:
 
@@ -28,7 +27,7 @@ class AudioTranscription:
     Returns:
         None
     """
-    def Transcribe(self, get_audio_data : callable, process_transcript : callable, stop_event : Event, sleep = 1) -> None:
+    def Transcribe(self, get_audio_data : callable, process_transcript : callable, stop_event : Event) -> None:
         if not callable(get_audio_data):
             raise Exception(f'{get_audio_data} is not callable')
         if not callable(process_transcript):
@@ -44,7 +43,6 @@ class AudioTranscription:
                 raise Exception(f'{audio} is not type of {AudioData}')
             transcript = AudioTranscription.TranscribeOnce(self.recognizer, audio)
             process_transcript(transcript)
-            time.sleep(sleep)
 
     """
     Transcribe the audio captured
