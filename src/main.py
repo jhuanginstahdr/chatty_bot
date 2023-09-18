@@ -3,13 +3,13 @@ from threading import Event, main_thread, enumerate as thread_enumerate
 from queue import Queue
 from time import sleep
 
-from capture_by_speech_recognition import AudioCaptureBySpeechRecognition
-from transcription_by_speech_recognition import AudioTranscriptionBySpeechRecognition
-from response_by_openai import ResponseFromOpenAI
+from model.speech.audio_capture.capture_by_speech_recognition import AudioCaptureBySpeechRecognition
+from model.speech.audio_transcription.transcription_by_speech_recognition import AudioTranscriptionBySpeechRecognition
+from model.large_language_model.response_by_openai import ResponseFromOpenAI
 
-from capture_service import CreateAudioCaptureService
-from transcription_service import CreateAudioTranscriptionService
-from response_service import CreateResponseService
+from services.speech.capture_service import CreateAudioCaptureService
+from services.speech.transcription_service import CreateAudioTranscriptionService
+from services.large_language_model.response_service import CreateResponseService
 
 """
 A demo on how the three services: capture, transcription and response work together
