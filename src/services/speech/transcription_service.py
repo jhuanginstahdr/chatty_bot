@@ -1,7 +1,7 @@
 from threading import Thread, Event
 from queue import Queue, Empty, Full
 from logging import debug, error, info
-from ...model.speech.audio_transcription.transcription import AudioTranscription
+from model.speech.audio_transcription.transcription import AudioTranscription
 
 def CreateAudioTranscriptionService(
     transcript : AudioTranscription, 
