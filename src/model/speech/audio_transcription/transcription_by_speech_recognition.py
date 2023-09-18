@@ -1,6 +1,6 @@
 from speech_recognition import Recognizer, AudioData, UnknownValueError, RequestError
 from threading import Event
-from logging import debug, error
+from logging import debug, error, info
 from ..audio_transcription.transcription import AudioTranscription
 
 class AudioTranscriptionBySpeechRecognition(AudioTranscription):
@@ -47,6 +47,8 @@ class AudioTranscriptionBySpeechRecognition(AudioTranscription):
                 raise Exception(f'{audio} is not type of {AudioData}')
             transcript = AudioTranscriptionBySpeechRecognition.TranscribeOnce(self.recognizer, audio)
             process_transcript(transcript)
+
+        info(f'exited audio transcription loop')
 
 
     @staticmethod

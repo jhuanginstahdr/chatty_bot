@@ -59,3 +59,5 @@ class ResponseFromOpenAI(ResponseGenerator):
             prompt = get_prompt()
             response = self.QueryOnce(prompt)
             process_response(response)
+        
+        info('exited querying loop')

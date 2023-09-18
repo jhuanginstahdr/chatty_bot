@@ -45,6 +45,8 @@ class AudioCaptureBySpeechRecognition(AudioCapture):
                 audio = AudioCaptureBySpeechRecognition.CaptureOnce(self.recognizer, source)
                 process_audio(audio)
 
+        info(f'exited audio capturing loop')
+
     @staticmethod
     def CaptureOnce(recognizer : Recognizer, source : AudioSource) -> AudioData:
         """

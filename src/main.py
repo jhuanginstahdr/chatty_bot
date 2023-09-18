@@ -1,7 +1,8 @@
 from speech_recognition import Recognizer, Microphone
-from threading import Event, main_thread, enumerate as thread_enumerate
+from threading import Event
 from queue import Queue
 from time import sleep
+from logging import info
 
 from model.speech.audio_capture.capture_by_speech_recognition import AudioCaptureBySpeechRecognition
 from model.speech.audio_transcription.transcription_by_speech_recognition import AudioTranscriptionBySpeechRecognition
@@ -43,14 +44,12 @@ def demo_direct_speech_to_text_to_llm() -> None:
     except KeyboardInterrupt:
         stop_event.set()
 
-    #join all threads
-    for thread in thread_enumerate():
-        if thread == main_thread():
-            continue
-        thread.join()
+    capture_thread.join()
+    transcription_thread.join()
+    response_thread.join()
 
 if __name__ == "__main__":
     import logging
     logging.basicConfig(level=logging.INFO)
     demo_direct_speech_to_text_to_llm()
-    print('App has exited')
+    info('App has exited')
