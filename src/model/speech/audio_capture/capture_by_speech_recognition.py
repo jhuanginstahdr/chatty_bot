@@ -63,7 +63,7 @@ class AudioCaptureBySpeechRecognition(AudioCapture):
             raise Exception(f'{source} is not type of {AudioSource}')
         
         try:
-            return recognizer.listen(source)
+            return recognizer.listen(source, phrase_time_limit=10)
         except WaitTimeoutError:
             error('Wait timeout')
         except Exception:
