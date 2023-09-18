@@ -1,6 +1,7 @@
 from threading import Event
 from openai import ChatCompletion
 from response import ResponseGenerator
+from logging import info
 
 class ResponseFromOpenAI(ResponseGenerator):
 
@@ -29,6 +30,7 @@ class ResponseFromOpenAI(ResponseGenerator):
         """
         if not prompt:
             return None
+        info(f'Prompt: {prompt}')
         response = ChatCompletion.create(
             model="gpt-3.5-turbo", 
             messages=[{"role": "user", "content": prompt}])

@@ -1,6 +1,6 @@
 from threading import Thread, Event
 from queue import Queue, Empty, Full
-from logging import debug, error
+from logging import debug, error, info
 
 from transcription import AudioTranscription
 
@@ -24,7 +24,7 @@ def CreateAudioTranscriptionService(
     def put_in_text_queue(text):
         if not text:
             return
-        debug(f'putting {text} in text_q')
+        info(f'transcript: {text}')
         try:
             text_q.put(text)
         except Full:

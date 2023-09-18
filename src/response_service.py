@@ -24,9 +24,7 @@ def CreateResponseService(
                 break
         if not list:
             return None
-        prompt = " ".join(list)
-        info(f'prompt: {prompt}')
-        return prompt
+        return " ".join(list)
     
     # print out the response
     def print_response(text : str):
