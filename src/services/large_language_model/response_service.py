@@ -1,7 +1,7 @@
 from threading import Thread, Event
 from queue import Queue, Empty
 from logging import info, debug
-from response import ResponseGenerator
+from ...model.large_language_model.response import ResponseGenerator
 
 def CreateResponseService(
     response : ResponseGenerator, 
