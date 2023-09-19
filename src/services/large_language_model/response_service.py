@@ -29,7 +29,7 @@ def CreateResponseService(
     # print out the response
     def print_response(text : str):
         if text:
-            info(f'response: {text}')
+            info(f'response: {text}\n\n')
 
     # thread for feeding prompt and getting responses via OpenAI's API
     return Thread(target=lambda: response.Query(create_prompt_from_text_queue, print_response, stop_event))
