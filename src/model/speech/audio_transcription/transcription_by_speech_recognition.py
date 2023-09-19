@@ -1,7 +1,7 @@
 from speech_recognition import Recognizer, AudioData, UnknownValueError, RequestError
 from threading import Event
 from logging import debug, error, info
-from ..audio_transcription.transcription import AudioTranscription
+from .transcription import AudioTranscription
 
 class AudioTranscriptionBySpeechRecognition(AudioTranscription):
 

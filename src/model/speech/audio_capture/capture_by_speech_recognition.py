@@ -1,7 +1,7 @@
 from speech_recognition import Recognizer, AudioData, AudioSource, WaitTimeoutError
 from threading import Event
 from logging import info, error
-from ..audio_capture.capture import AudioCapture
+from .capture import AudioCapture
 
 class AudioCaptureBySpeechRecognition(AudioCapture):
 

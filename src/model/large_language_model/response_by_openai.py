@@ -1,6 +1,6 @@
 from threading import Event
 from openai import ChatCompletion
-from ..large_language_model.response import ResponseGenerator
+from .response import ResponseGenerator
 from logging import info
 
 class ResponseFromOpenAI(ResponseGenerator):
