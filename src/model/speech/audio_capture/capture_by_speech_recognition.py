@@ -39,11 +39,11 @@ class AudioCaptureBySpeechRecognition(AudioCapture):
             raise Exception(f'{stop_event} is not of type {Event}')
         
         info('Listening for speech...')
-        with self.audio_source:
-            self.recognizer.adjust_for_ambient_noise(self.audio_source)
-            while not stop_event.is_set():
-                audio = AudioCaptureBySpeechRecognition.CaptureOnce(self.recognizer, self.audio_source)
-                process_audio(audio)
+        source = self.audio_source.__enter__()
+        self.recognizer.adjust_for_ambient_noise(source)
+        while not stop_event.is_set():
+            audio = AudioCaptureBySpeechRecognition.CaptureOnce(self.recognizer, source)
+            process_audio(audio)
 
         info(f'exited audio capturing loop')
 
