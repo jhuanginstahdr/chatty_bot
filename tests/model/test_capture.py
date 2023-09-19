@@ -1,9 +1,8 @@
 from unittest import TestCase
 from unittest.mock import Mock, patch
-from speech_recognition import Recognizer, AudioData, AudioSource, WaitTimeoutError
+from speech_recognition import Recognizer, AudioSource, WaitTimeoutError
 from src.model.speech.audio_capture.capture_by_speech_recognition import AudioCaptureBySpeechRecognition
 from threading import Event
-from mock_utilities import mock_audio_file_as_source
 
 class TestAudioCaptureBySpeechRecognition(TestCase):
 
