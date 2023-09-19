@@ -11,7 +11,7 @@ class AudioCaptureBySpeechRecognition(AudioCapture):
 
         Args:
             recognizer (Recognizer) : object required for capturing audio data
-            audio_source (AudioSource) : device for capturing audio data
+            audio_source (AudioSource) : source of audio data (e.g. microphone or file)
         """
         if not isinstance(recognizer, Recognizer):
             raise Exception(f'{recognizer} is not type of {Recognizer}')
@@ -46,8 +46,6 @@ class AudioCaptureBySpeechRecognition(AudioCapture):
                 process_audio(audio)
 
         info(f'exited audio capturing loop')
-
-
 
     @staticmethod
     def CaptureOnce(recognizer : Recognizer, source : AudioSource) -> AudioData:
