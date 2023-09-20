@@ -10,13 +10,9 @@ class TestAudioCaptureBySpeechRecognition(TestCase):
         """
         Initial setup for the tests designed using AudioCaptureBySpeechRecognition package for audio capture
         """
-        # Mock Recognizer and AudioSource
         self.mock_recognizer = Mock(spec=Recognizer)
         self.mock_audio_source = Mock(spec=AudioSource)
-
-        # Patch the context manager to return another mock object
         self.mock_audio_source.__enter__ = Mock(return_value=self.mock_audio_source)
-
         self.capture_service = AudioCaptureBySpeechRecognition(self.mock_recognizer, self.mock_audio_source)
 
     def test_init(self):
@@ -25,15 +21,17 @@ class TestAudioCaptureBySpeechRecognition(TestCase):
         """
         with self.assertRaises(Exception):
             # Test invalid recognizer
-            AudioCaptureBySpeechRecognition(None, self.mock_audio_source)
+            invalid_recognizer = Mock()
+            AudioCaptureBySpeechRecognition(invalid_recognizer, self.mock_audio_source)
 
         with self.assertRaises(Exception):
             # Test invalid audio_source
-            AudioCaptureBySpeechRecognition(self.mock_recognizer, None)
+            invalid_audio_source = Mock()
+            AudioCaptureBySpeechRecognition(self.mock_recognizer, invalid_audio_source)
 
     def test_capture_once(self):
         """
-        Test AudioCaptureBySpeechRecognition.CaptureOnce with valid args
+        Test CaptureOnce with valid args
         """
         # Configure mock Recognizer and AudioSource
         audio_data_mock = Mock()
@@ -44,61 +42,41 @@ class TestAudioCaptureBySpeechRecognition(TestCase):
         self.assertEqual(captured_audio, audio_data_mock)
         self.mock_recognizer.listen.assert_called_with(self.mock_audio_source, phrase_time_limit=10)
 
-    def test_invalid_recognizer(self):
+    def test_capture_once_with_invalid_inputs(self):
         """
-        Test AudioCaptureBySpeechRecognition.CaptureOnce with invalid recognizer
+        Test CaptureOnce with invalid inputs
         """
-        # Mock an invalid Recognizer
-        invalid_recognizer = Mock()
-        invalid_recognizer.side_effect = Exception("Invalid recognizer")
-
         with self.assertRaises(Exception):
+            # Mock an invalid Recognizer
+            invalid_recognizer = Mock()
             AudioCaptureBySpeechRecognition.CaptureOnce(invalid_recognizer, self.mock_audio_source)
 
-    def test_invalid_source(self):
-        """
-        Test AudioCaptureBySpeechRecognition.CaptureOnce with invalid recognizer
-        """
-        # Mock an invalid AudioSource
-        invalid_source = Mock()
-        invalid_source.side_effect = Exception("Invalid source")
-
         with self.assertRaises(Exception):
+            # Mock an invalid AudioSource
+            invalid_source = Mock()
             AudioCaptureBySpeechRecognition.CaptureOnce(self.mock_recognizer, invalid_source)
 
-    def test_wait_timeout_error(self):
+    def test_capture_once_with_caught_errors(self):
         """
-        Test AudioCaptureBySpeechRecognition.CaptureOnce with time out error
+        Test CaptureOnce with errors raised by listen
         """
-        # Mock WaitTimeoutError
-        self.mock_recognizer.listen.side_effect = WaitTimeoutError("Wait timeout")
-
         with self.assertLogs(level='ERROR'):
+            self.mock_recognizer.listen.side_effect = WaitTimeoutError("Wait timeout")
             audio_data = AudioCaptureBySpeechRecognition.CaptureOnce(self.mock_recognizer, self.mock_audio_source)
             self.assertIsNone(audio_data)
 
-    def test_unknown_error(self):
-        """
-        Test AudioCaptureBySpeechRecognition.CaptureOnce with unknown error
-        """
-        # Mock an unknown error during capturing
-        self.mock_recognizer.listen.side_effect = Exception("Unknown error")
-
         with self.assertLogs(level='ERROR'):
+            self.mock_recognizer.listen.side_effect = Exception("Unknown error")
             audio_data = AudioCaptureBySpeechRecognition.CaptureOnce(self.mock_recognizer, self.mock_audio_source)
             self.assertIsNone(audio_data)
 
     @patch('src.model.speech.audio_capture.capture_by_speech_recognition.AudioCaptureBySpeechRecognition.CaptureOnce')
     def test_capture(self, _):
         """
-        Test AudioCaptureBySpeechRecognition.Capture with valid args
+        Test Capture with valid args and ensure that process_audio is called
         """
-        # Mock process_audio method
         process_audio_mock = Mock()
-
-        # Mock the stop event
         stop_event_mock = Mock(spec=Event)
-        # Exit loop on the second iteration
         stop_event_mock.is_set.side_effect = [False, True]  
 
         self.capture_service.Capture(process_audio_mock, stop_event_mock)
@@ -106,29 +84,21 @@ class TestAudioCaptureBySpeechRecognition(TestCase):
         # Ensure the process_audio method was called
         process_audio_mock.assert_called()
 
-    def test_capture_process_audio_not_callable(self):
+    def test_capture_with_invalid_inputs(self):
         """
-        Test AudioCaptureBySpeechRecognition.Capture with process_audio_mock not being callable
+        Test Capture with invalid inputs
         """
-        # Mock process_audio method
-        invalid_process = 123
-
-        # Mock the stop event
+        process_audio_mock = Mock()
         stop_event_mock = Mock(spec=Event)
 
         with self.assertRaises(Exception):
-            self.capture_service.Capture(invalid_process, stop_event_mock)
-
-    def test_capture_invalid_stop_event(self):
-        """
-        Test AudioCaptureBySpeechRecognition.Capture with invalid stop_event
-        """
-        # Mock process_audio method
-        process_audio_mock = Mock()
-
-        # Mock the stop event 
-        invalid_stop_event = Mock()
+            # Mock uncallable process_audio method
+            invalid_process_audio = 123
+            self.capture_service.Capture(invalid_process_audio, stop_event_mock)
 
         with self.assertRaises(Exception):
+            # Mock invalid stop_event 
+            invalid_stop_event = Mock()
             self.capture_service.Capture(process_audio_mock, invalid_stop_event)
+
 
