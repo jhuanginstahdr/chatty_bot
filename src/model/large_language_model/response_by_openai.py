@@ -30,6 +30,10 @@ class ResponseFromOpenAI(ResponseGenerator):
         """
         if not prompt:
             return None
+        
+        if not isinstance(prompt, str):
+            raise Exception(f'{prompt} is not of type {str}')
+        
         info(f'Prompt: {prompt}')
         response = ChatCompletion.create(
             model="gpt-3.5-turbo", 
