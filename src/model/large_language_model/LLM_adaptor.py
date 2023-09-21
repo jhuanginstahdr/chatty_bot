@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-class LLM(ABC):
+class LLM_Adaptor(ABC):
     @abstractmethod
     def Setup(self) -> None:
         """

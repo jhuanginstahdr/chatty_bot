@@ -6,7 +6,8 @@ from logging import info
 
 from model.speech.audio_capture.capture_by_speech_recognition import AudioCaptureBySpeechRecognition
 from model.speech.audio_transcription.transcription_by_speech_recognition import AudioTranscriptionBySpeechRecognition
-from model.large_language_model.response_by_openai import ResponseFromOpenAI
+from model.large_language_model.response_by_llm import ResponseByLLM
+from model.large_language_model.LLM_OpenAI import LLM_OpenAI
 
 from services.speech.capture_service import CreateAudioCaptureService
 from services.speech.transcription_service import CreateAudioTranscriptionService
@@ -33,7 +34,9 @@ def demo_direct_speech_to_text_to_llm() -> None:
     transcription_thread.start()
 
     import os
-    response = ResponseFromOpenAI(os.environ.get('OPENAI_API_KEY'))
+    openai_api_key = os.environ.get('OPENAI_API_KEY')
+    openai_llm = LLM_OpenAI(openai_api_key)
+    response = ResponseByLLM(openai_llm)
     response_thread = CreateResponseService(response, text_q, stop_event)
     response_thread.start()
 
