@@ -1,0 +1,29 @@
+{
+    "intents": {
+        "weather": {
+            "responses": [
+                "The weather today in {location} is {condition}.",
+                "Today's weather in {location}: {condition}."
+            ],
+            "arguments": {
+                "location": ["today", "week"]
+            }
+        },
+        "device_control": {
+            "responses": {
+                "lights": {
+                    "change_colour": "Changing the color of the lights to {color}.",
+                    "on": "Turning the lights on.",
+                    "off": "Turning the lights off.",
+                    "brightness": "Adjusting the brightness of the lights to {level}."
+                },
+                "timer": {
+                    "1_minute": "Setting a timer for 1 minute.",
+                    "1_hour": "Setting a timer for 1 hour.",
+                    "1_day": "Setting a timer for 1 day.",
+                    "1_week": "Setting a timer for 1 week."
+                }
+            }
+        }
+    }
+}
