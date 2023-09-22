@@ -44,9 +44,9 @@ class TestResponseByLLM(TestCase):
         """
         mock_prompt = 'Test Prompt'
 
-        with self.assertRaises(Exception):
+        with self.assertLogs(level='ERROR'):
             # raising an error while creating a response
-            mock_create.return_value = Exception('Error querying')
+            mock_create.side_effect = Exception('Error querying')
             self.llm_adaptor.ConsumePrompt(mock_prompt)
             self.assertEqual(None, self.llm_adaptor.reply)
 
@@ -78,6 +78,6 @@ class TestResponseByLLM(TestCase):
         """
         Test ParseResponse when llm_adaptor.reply is invalid
         """
-        with self.assertRaises(Exception):
+        with self.assertLogs(level='ERROR'):
             self.llm_adaptor.reply = ''
             self.llm_adaptor.ParseResponse()
