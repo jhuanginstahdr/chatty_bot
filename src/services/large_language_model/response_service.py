@@ -27,13 +27,17 @@ def CreateResponseService(
             return None
         return " ".join(list)
 
-    # store the transcript in text_q
+    # store the response from llm in text_q
     def put_in_response_queue(text):
         if not text:
             return
-        info(f'response: {text}')
+        info(f'response:\n{text}')
+        import re
+        chunks = re.split(r'[,\.\n]', text)
         try:
-            response_q.put(text)
+            for chunk in chunks:
+                debug(f'{chunk}')
+                response_q.put(chunk)
         except Full:
             error(f'cannot place item in {response_q}')
 

@@ -54,11 +54,8 @@ class SpeechGeneratorByPyttsx3(SpeechGenerator):
             raise Exception(f'{stop_event} is not type of {Event}')
 
         while not stop_event.is_set():
-            chunks = get_text()
-            if chunks is None:
-                continue
-            for chunk in chunks:
-                self.PlayGeneratedSpeechOnce(chunk)
+            text = get_text()
+            self.PlayGeneratedSpeechOnce(text)
         
         info('exited speech generation loop')
         
