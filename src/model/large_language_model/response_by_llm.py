@@ -1,32 +1,31 @@
 from threading import Event
-from openai import ChatCompletion
+from .LLM_adaptor import LLM_Adaptor
 from .response import ResponseGenerator
 from logging import info
 
-class ResponseFromOpenAI(ResponseGenerator):
+class ResponseByLLM(ResponseGenerator):
 
-    def __init__(self, key : str):
+    def __init__(self, llm_adaptor : LLM_Adaptor):
         """
-        Cosntructs an object of ResponseGenerator that sends a prompt for response from OpenAI's large language model
+        Cosntructs an object of ResponseGenerator that sends a prompt for response from the provided large language model (LLM)
 
         Args:
-            key (str) : required for using OpenAI's API
+            llm_adaptor (LLM_Adaptor) : an instance of LLM_Adaptor that contains a specific large language model (e.g. openai, llama etc)
         """
-        if not isinstance(key, str):
-            raise Exception(f'{key} is not of type {str}')
+        if not isinstance(llm_adaptor, LLM_Adaptor):
+            raise Exception(f'{llm_adaptor} is not of type {LLM_Adaptor}')
         
-        import openai
-        openai.api_key = key
+        self.llm_adaptor = llm_adaptor
 
     def QueryOnce(self, prompt: str) -> str:
         """
-        Gets a response from OpenAI based on the given prompt
+        Gets a response from self.llm_adaptor based on the given prompt
         
         Args:
-            prompt (str) : query to OpenAI's LLM
+            prompt (str) : query to be consumed by self.llm_adaptor
 
         Returns:
-            response from OpenAI's LLM
+            response from self.llm_adaptor
         """
         if not prompt:
             return None
@@ -35,10 +34,9 @@ class ResponseFromOpenAI(ResponseGenerator):
             raise Exception(f'{prompt} is not of type {str}')
         
         info(f'Prompt: {prompt}')
-        response = ChatCompletion.create(
-            model="gpt-3.5-turbo", 
-            messages=[{"role": "user", "content": prompt}])
-        return response["choices"][0]["message"]["content"]
+        #except exceptions to be handled within ConsumePrompt and ParseResponse
+        self.llm_adaptor.ConsumePrompt(prompt)
+        return self.llm_adaptor.ParseResponse()
     
     def Query(self, get_prompt : callable, process_response : callable, stop_event : Event) -> None:
         """
