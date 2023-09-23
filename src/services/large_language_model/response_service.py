@@ -32,12 +32,8 @@ def CreateResponseService(
         if not text:
             return
         info(f'response:\n{text}')
-        import re
-        chunks = re.split(r'[,\.\n]', text)
         try:
-            for chunk in chunks:
-                debug(f'{chunk}')
-                response_q.put(chunk)
+            response_q.put(text)
         except Full:
             error(f'cannot place item in {response_q}')
 
