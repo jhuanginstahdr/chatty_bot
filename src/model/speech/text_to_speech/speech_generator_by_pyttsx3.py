@@ -1,13 +1,13 @@
-import pyttsx3
+from pyttsx3 import Engine
 from threading import Event
 from logging import error, info
 from .speech_generator import SpeechGenerator
 
 class SpeechGeneratorByPyttsx3(SpeechGenerator):
-    def __init__(self):
-        engine = pyttsx3.init()
-        voices = engine.getProperty('voices')
-        engine.setProperty('voice', voices[1].id)
+    def __init__(self, engine : Engine):
+        if not isinstance(engine, Engine):
+            raise Exception(f'{engine} is not of type {Engine}')
+
         self.engine = engine
 
     @staticmethod
@@ -16,7 +16,7 @@ class SpeechGeneratorByPyttsx3(SpeechGenerator):
             return True
         return all(char.isspace() for char in text)
 
-    def PlayGeneratedSpeechOnce(self, text : str) -> None:
+    def GenerateSpeechOnce(self, text : str) -> None:
         """
         Generate speech given the text and play the speech
 
@@ -56,6 +56,6 @@ class SpeechGeneratorByPyttsx3(SpeechGenerator):
 
         while not stop_event.is_set():
             text = get_text()
-            self.PlayGeneratedSpeechOnce(text)
+            self.GenerateSpeechOnce(text)
         
         info('exited speech generation loop')

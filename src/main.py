@@ -43,7 +43,11 @@ def demo_direct_speech_to_text_to_llm() -> None:
     response_thread = CreateResponseService(response, query_q, response_q, stop_event)
     response_thread.start()
 
-    pttsx3_generator = SpeechGeneratorByPyttsx3()
+    import pyttsx3
+    engine = pyttsx3.init()
+    voices = engine.getProperty('voices')
+    engine.setProperty('voice', voices[1].id)
+    pttsx3_generator = SpeechGeneratorByPyttsx3(engine)
     speech_generator_thread = CreateSpeechGenerationService(pttsx3_generator, response_q, stop_event)
     speech_generator_thread.start()
 

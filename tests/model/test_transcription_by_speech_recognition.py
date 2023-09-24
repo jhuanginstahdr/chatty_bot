@@ -101,6 +101,13 @@ class TestAudioTranscriptionBySpeechRecognition(TestCase):
             self.transcription_service.Transcribe(mock_stop_event, 
                                                   get_audio_data = invalid_get_audio_data, 
                                                   process_transcript = mock_process_transcript)
+            
+        with self.assertRaises(Exception):
+            # Mock uncallable get_audio_data
+            invalid_get_audio_data = 123
+            self.transcription_service.Transcribe(mock_stop_event, 
+                                                  invalid_kwarg = mock_get_audio_data, 
+                                                  process_transcript = mock_process_transcript)
 
         with self.assertRaises(Exception):
             # Mock uncallable process_transcript
@@ -108,6 +115,13 @@ class TestAudioTranscriptionBySpeechRecognition(TestCase):
             self.transcription_service.Transcribe(mock_stop_event, 
                                                   get_audio_data = mock_get_audio_data, 
                                                   process_transcript = invalid_process_transcript)
+            
+        with self.assertRaises(Exception):
+            # Mock uncallable process_transcript
+            invalid_process_transcript = 123
+            self.transcription_service.Transcribe(mock_stop_event, 
+                                                  get_audio_data = mock_get_audio_data, 
+                                                  invalid_kwarg = mock_process_transcript)
 
         with self.assertRaises(Exception):
             # Mock invalid stop_event

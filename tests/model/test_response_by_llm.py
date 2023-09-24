@@ -1,5 +1,5 @@
 from unittest import TestCase
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 from src.model.large_language_model.response_by_llm import ResponseByLLM
 from src.model.large_language_model.LLM_adaptor import LLM_Adaptor
 from threading import Event
@@ -84,6 +84,13 @@ class TestResponseByLLM(TestCase):
             self.response_service.Query(mock_stop_event, 
                                         get_prompt = invalid_get_prompt, 
                                         process_response = mock_process_response)
+            
+        with self.assertRaises(Exception):
+            # Mock uncallable get_prompt
+            invalid_get_prompt = 123
+            self.response_service.Query(mock_stop_event, 
+                                        invalid_kwarg = mock_get_prompt, 
+                                        process_response = mock_process_response)
 
         with self.assertRaises(Exception):
             # Mock uncallable process_response
@@ -91,6 +98,13 @@ class TestResponseByLLM(TestCase):
             self.response_service.Query(mock_stop_event, 
                                         get_prompt = mock_get_prompt, 
                                         process_transcript = invalid_process_transcript)
+            
+        with self.assertRaises(Exception):
+            # Mock uncallable process_response
+            invalid_process_transcript = 123
+            self.response_service.Query(mock_stop_event, 
+                                        get_prompt = mock_get_prompt, 
+                                        invalid_kwarg = mock_process_response)
 
         with self.assertRaises(Exception):
             # Mock invalid stop_event

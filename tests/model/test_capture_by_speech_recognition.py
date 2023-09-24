@@ -97,6 +97,11 @@ class TestAudioCaptureBySpeechRecognition(TestCase):
             self.capture_service.Capture(stop_event_mock, process_audio = invalid_process_audio)
 
         with self.assertRaises(Exception):
+            # Mock uncallable process_audio method
+            invalid_process_audio = 123
+            self.capture_service.Capture(stop_event_mock, invalid_kwarg = process_audio_mock)
+
+        with self.assertRaises(Exception):
             # Mock invalid stop_event 
             invalid_stop_event = Mock()
             self.capture_service.Capture(invalid_stop_event, process_audio = process_audio_mock)
