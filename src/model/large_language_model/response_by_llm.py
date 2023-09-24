@@ -38,7 +38,7 @@ class ResponseByLLM(ResponseGenerator):
         self.llm_adaptor.ConsumePrompt(prompt)
         return self.llm_adaptor.ParseResponse()
     
-    def Query(self, get_prompt : callable, process_response : callable, stop_event : Event) -> None:
+    def Query(self, stop_event : Event, **kwargs) -> None:
         """
         Continuously consumes prompts in a loop and requests responses from OpenAI's large language model.
         The loop ends when the stop event is set.
@@ -50,6 +50,8 @@ class ResponseByLLM(ResponseGenerator):
         Returns:
             None
         """
+        get_prompt = kwargs.get('get_prompt', None)
+        process_response = kwargs.get('process_response', None)
         if not callable(get_prompt):
             raise Exception(f'{get_prompt} is not callable')
         if not callable(process_response):

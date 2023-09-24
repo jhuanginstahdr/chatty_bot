@@ -78,7 +78,9 @@ class TestAudioTranscriptionBySpeechRecognition(TestCase):
         mock_stop_event.is_set.side_effect = [False, True]  
 
         # Mock audio transcription
-        self.transcription_service.Transcribe(mock_get_audio_data, mock_process_transcript, mock_stop_event)
+        self.transcription_service.Transcribe(mock_stop_event, 
+                                              get_audio_data = mock_get_audio_data, 
+                                              process_transcript = mock_process_transcript)
 
         # Check if mock_get_audio_data and mock_process_transcript were called
         mock_get_audio_data.assert_called_once()
@@ -96,17 +98,37 @@ class TestAudioTranscriptionBySpeechRecognition(TestCase):
         with self.assertRaises(Exception):
             # Mock uncallable get_audio_data
             invalid_get_audio_data = 123
-            self.transcription_service.Transcribe(invalid_get_audio_data, mock_process_transcript, mock_stop_event)
+            self.transcription_service.Transcribe(mock_stop_event, 
+                                                  get_audio_data = invalid_get_audio_data, 
+                                                  process_transcript = mock_process_transcript)
+            
+        with self.assertRaises(Exception):
+            # Mock uncallable get_audio_data
+            invalid_get_audio_data = 123
+            self.transcription_service.Transcribe(mock_stop_event, 
+                                                  invalid_kwarg = mock_get_audio_data, 
+                                                  process_transcript = mock_process_transcript)
 
         with self.assertRaises(Exception):
             # Mock uncallable process_transcript
             invalid_process_transcript = 123
-            self.transcription_service.Transcribe(mock_get_audio_data, invalid_process_transcript, mock_stop_event)
+            self.transcription_service.Transcribe(mock_stop_event, 
+                                                  get_audio_data = mock_get_audio_data, 
+                                                  process_transcript = invalid_process_transcript)
+            
+        with self.assertRaises(Exception):
+            # Mock uncallable process_transcript
+            invalid_process_transcript = 123
+            self.transcription_service.Transcribe(mock_stop_event, 
+                                                  get_audio_data = mock_get_audio_data, 
+                                                  invalid_kwarg = mock_process_transcript)
 
         with self.assertRaises(Exception):
             # Mock invalid stop_event
             invalid_stop_event = Mock()
-            self.transcription_service.Transcribe(mock_get_audio_data, mock_process_transcript, invalid_stop_event)
+            self.transcription_service.Transcribe(invalid_stop_event, 
+                                                  get_audio_data = mock_get_audio_data, 
+                                                  process_transcript = mock_process_transcript)
 
     def test_transcribe_invalid_audio_data(self):
         """
@@ -119,4 +141,6 @@ class TestAudioTranscriptionBySpeechRecognition(TestCase):
         mock_stop_event.is_set.side_effect = [False, True]  
 
         with self.assertRaises(Exception):
-            self.transcription_service.Transcribe(mock_get_audio_data, mock_process_transcript, mock_stop_event)
+            self.transcription_service.Transcribe(mock_stop_event, 
+                                                  get_audio_data = mock_get_audio_data, 
+                                                  process_transcript = mock_process_transcript)

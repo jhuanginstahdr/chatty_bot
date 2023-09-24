@@ -18,7 +18,7 @@ class AudioTranscriptionBySpeechRecognition(AudioTranscription):
         
         self.recognizer = recognizer
 
-    def Transcribe(self, get_audio_data : callable, process_transcript : callable, stop_event : Event) -> None:
+    def Transcribe(self, stop_event : Event, **kwargs) -> None:
         """
         Continuous audio transcription in a loop where the loop ends when the stop_event is set.
         The audio data for transcription is consumed from get_audio_data function and the result
@@ -32,6 +32,8 @@ class AudioTranscriptionBySpeechRecognition(AudioTranscription):
         Returns:
             None
         """
+        get_audio_data = kwargs.get('get_audio_data', None)
+        process_transcript = kwargs.get('process_transcript', None)
         if not callable(get_audio_data):
             raise Exception(f'{get_audio_data} is not callable')
         if not callable(process_transcript):

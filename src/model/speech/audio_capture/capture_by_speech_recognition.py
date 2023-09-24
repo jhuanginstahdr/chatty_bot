@@ -21,7 +21,7 @@ class AudioCaptureBySpeechRecognition(AudioCapture):
         self.recognizer = recognizer
         self.audio_source = audio_source
 
-    def Capture(self, process_audio : callable, stop_event : Event) -> None:
+    def Capture(self, stop_event : Event, **kwargs) -> None:
         """
         Continuous audio capture that feeds audio data to process_audio in a loop. The
         loop ends when the stop_event is set. 
@@ -33,6 +33,7 @@ class AudioCaptureBySpeechRecognition(AudioCapture):
         Returns:
             None
         """
+        process_audio = kwargs.get('process_audio', None)
         if not callable(process_audio):
             raise Exception(f'{process_audio} is not callable')
         if not isinstance(stop_event, Event):

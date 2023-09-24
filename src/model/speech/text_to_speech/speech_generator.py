@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from threading import Event
 
-class ResponseGenerator(ABC):
+class SpeechGenerator(ABC):
     @abstractmethod
-    def Query(self, stop_event : Event, **kwargs) -> None:
+    def GenerateSpeech(self, stop_event : Event, **kwargs) -> None:
         pass
