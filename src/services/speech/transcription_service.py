@@ -29,4 +29,6 @@ def CreateAudioTranscriptionService(
         except Full:
             error('cannot place item in queue')
 
-    return Thread(target=lambda: transcript.Transcribe(get_from_audio_queue, put_in_text_queue, stop_event))
+    return Thread(target=lambda: transcript.Transcribe(stop_event, 
+                                                       get_audio_data = get_from_audio_queue, 
+                                                       process_transcript = put_in_text_queue))

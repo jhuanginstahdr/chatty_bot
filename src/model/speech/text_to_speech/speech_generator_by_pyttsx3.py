@@ -36,7 +36,7 @@ class SpeechGeneratorByPyttsx3(SpeechGenerator):
         except Exception as e:
             error(f'Error generating and playing back the speech {e}')
 
-    def GenerateSpeech(self, get_text : callable, abort_speech : callable, stop_event : Event):
+    def GenerateSpeech(self, stop_event : Event, **kwargs):
         """
         Continuous text-to-speech-generation and playback in a loop where the loop ends when the stop_event is set.
         The texts for speech generation are consumed from get_audio_data function and the result
@@ -48,6 +48,7 @@ class SpeechGeneratorByPyttsx3(SpeechGenerator):
         Returns:
             None
         """
+        get_text = kwargs.get('get_text', None)
         if not callable(get_text):
             raise Exception(f'{get_text} is not callable')
         if not isinstance(stop_event, Event):
@@ -58,5 +59,3 @@ class SpeechGeneratorByPyttsx3(SpeechGenerator):
             self.PlayGeneratedSpeechOnce(text)
         
         info('exited speech generation loop')
-        
-

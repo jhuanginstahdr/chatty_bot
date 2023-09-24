@@ -21,4 +21,4 @@ def CreateAudioCaptureService(
         except Full:
             error('cannot place item in queue')
 
-    return Thread(target=lambda: capture.Capture(put_in_audio_queue, stop_event))
+    return Thread(target=lambda: capture.Capture(stop_event, process_audio = put_in_audio_queue))

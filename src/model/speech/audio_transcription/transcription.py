@@ -3,5 +3,5 @@ from threading import Event
 
 class AudioTranscription(ABC):
     @abstractmethod
-    def Transcribe(self, get_audio_data : callable, process_transcript : callable, stop_event : Event) -> None:
+    def Transcribe(self, stop_event : Event, **kwargs) -> None:
         pass

@@ -3,5 +3,5 @@ from threading import Event
 
 class ResponseGenerator(ABC):
     @abstractmethod
-    def Query(self, get_prompt : callable, process_response : callable, stop_event : Event) -> None:
+    def Query(self, stop_event : Event, **kwargs) -> None:
         pass

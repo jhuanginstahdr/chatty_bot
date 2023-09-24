@@ -79,7 +79,7 @@ class TestAudioCaptureBySpeechRecognition(TestCase):
         stop_event_mock = Mock(spec=Event)
         stop_event_mock.is_set.side_effect = [False, True]  
 
-        self.capture_service.Capture(process_audio_mock, stop_event_mock)
+        self.capture_service.Capture(stop_event_mock, process_audio = process_audio_mock)
 
         # Ensure the process_audio method was called
         process_audio_mock.assert_called()
@@ -94,11 +94,11 @@ class TestAudioCaptureBySpeechRecognition(TestCase):
         with self.assertRaises(Exception):
             # Mock uncallable process_audio method
             invalid_process_audio = 123
-            self.capture_service.Capture(invalid_process_audio, stop_event_mock)
+            self.capture_service.Capture(stop_event_mock, process_audio = invalid_process_audio)
 
         with self.assertRaises(Exception):
             # Mock invalid stop_event 
             invalid_stop_event = Mock()
-            self.capture_service.Capture(process_audio_mock, invalid_stop_event)
+            self.capture_service.Capture(invalid_stop_event, process_audio = process_audio_mock)
 
 

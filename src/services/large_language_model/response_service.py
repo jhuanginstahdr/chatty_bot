@@ -38,4 +38,6 @@ def CreateResponseService(
             error(f'cannot place item in {response_q}')
 
     # thread for feeding prompt and getting responses via OpenAI's API
-    return Thread(target=lambda: response.Query(create_prompt_from_text_queue, put_in_response_queue, stop_event))
+    return Thread(target=lambda: response.Query(stop_event, 
+                                                get_prompt = create_prompt_from_text_queue, 
+                                                process_response = put_in_response_queue))

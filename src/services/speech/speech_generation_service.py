@@ -18,4 +18,4 @@ def CreateSpeechGenerationService(
         except Empty:
             debug('there was no text for speech generation')
 
-    return Thread(target=lambda: generator.GenerateSpeech(get_from_text_queue, None, stop_event))
+    return Thread(target=lambda: generator.GenerateSpeech(stop_event, get_text=get_from_text_queue))
