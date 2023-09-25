@@ -1,7 +1,7 @@
 from logging import debug, error
 from queue import Queue, Full
 from threading import Thread, Event
-from model.speech.audio_capture.capture import AudioCapture
+from src.model.speech.audio_capture.capture import AudioCapture
 
 def CreateAudioCaptureService(
     capture : AudioCapture, 

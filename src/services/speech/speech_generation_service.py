@@ -1,7 +1,7 @@
 from threading import Thread, Event
 from queue import Queue, Empty
 from logging import debug
-from model.speech.text_to_speech.speech_generator import SpeechGenerator
+from src.model.speech.text_to_speech.speech_generator import SpeechGenerator
 
 def CreateSpeechGenerationService(
     generator : SpeechGenerator, 
