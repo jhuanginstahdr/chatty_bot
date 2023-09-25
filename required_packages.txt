@@ -1,1 +1,0 @@
-flake8 pytest openai SpeechRecognition pyttsx3 pyaudio
