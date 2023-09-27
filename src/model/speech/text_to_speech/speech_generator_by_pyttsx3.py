@@ -6,7 +6,7 @@ from .speech_generator import SpeechGenerator
 class SpeechGeneratorByPyttsx3(SpeechGenerator):
     def __init__(self, engine : Engine):
         if not isinstance(engine, Engine):
-            raise Exception(f'{engine} is not of type {Engine}')
+            raise TypeError(f'{engine} is not of type {Engine}')
 
         self.engine = engine
 
@@ -33,8 +33,8 @@ class SpeechGeneratorByPyttsx3(SpeechGenerator):
             self.engine.startLoop(False)
             self.engine.iterate()
             self.engine.endLoop()
-        except Exception as e:
-            error(f'Error generating and playing back the speech {e}')
+        except Exception as unknown_e:
+            error(f'Unknwn error was raised while generating and playing back the speech {unknown_e}')
 
     def GenerateSpeech(self, stop_event : Event, **kwargs):
         """
@@ -50,9 +50,9 @@ class SpeechGeneratorByPyttsx3(SpeechGenerator):
         """
         get_text = kwargs.get('get_text', None)
         if not callable(get_text):
-            raise Exception(f'{get_text} is not callable')
+            raise TypeError(f'{get_text} is not callable')
         if not isinstance(stop_event, Event):
-            raise Exception(f'{stop_event} is not type of {Event}')
+            raise TypeError(f'{stop_event} is not type of {Event}')
 
         while not stop_event.is_set():
             text = get_text()

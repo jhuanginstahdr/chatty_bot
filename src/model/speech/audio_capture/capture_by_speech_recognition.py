@@ -14,9 +14,9 @@ class AudioCaptureBySpeechRecognition(AudioCapture):
             audio_source (AudioSource) : source of audio data (e.g. microphone or file)
         """
         if not isinstance(recognizer, Recognizer):
-            raise Exception(f'{recognizer} is not type of {Recognizer}')
+            raise TypeError(f'{recognizer} is not type of {Recognizer}')
         if not isinstance(audio_source, AudioSource):
-            raise Exception(f'{audio_source} is not type of {AudioSource}')
+            raise TypeError(f'{audio_source} is not type of {AudioSource}')
         
         self.recognizer = recognizer
         self.audio_source = audio_source
@@ -35,9 +35,9 @@ class AudioCaptureBySpeechRecognition(AudioCapture):
         """
         process_audio = kwargs.get('process_audio', None)
         if not callable(process_audio):
-            raise Exception(f'{process_audio} is not callable')
+            raise TypeError(f'{process_audio} is not callable')
         if not isinstance(stop_event, Event):
-            raise Exception(f'{stop_event} is not of type {Event}')
+            raise TypeError(f'{stop_event} is not of type {Event}')
         
         info('Listening for speech...')
         source = self.audio_source.__enter__()
@@ -61,13 +61,13 @@ class AudioCaptureBySpeechRecognition(AudioCapture):
             The captured audio data given recognizer and audio source
         """
         if not isinstance(recognizer, Recognizer):
-            raise Exception(f'{recognizer} is not type of {Recognizer}')
+            raise TypeError(f'{recognizer} is not type of {Recognizer}')
         if not isinstance(source, AudioSource):
-            raise Exception(f'{source} is not type of {AudioSource}')
+            raise TypeError(f'{source} is not type of {AudioSource}')
         
         try:
             return recognizer.listen(source, phrase_time_limit=10)
-        except WaitTimeoutError:
-            error('Wait timeout')
-        except Exception:
-            error('Unknown error with audio capturing')
+        except WaitTimeoutError as wait_e:
+            error(f'Wait timeout {wait_e}')
+        except Exception as unknown_e:
+            error(f'Unknown error with audio capturing {unknown_e}')

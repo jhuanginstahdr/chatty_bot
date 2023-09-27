@@ -5,7 +5,7 @@ from logging import error
 class LLM_OpenAI(LLM_Adaptor):
     def __init__(self, key : str):
         if not isinstance(key, str):
-            raise Exception(f'{key} is not of type {str}')
+            raise TypeError(f'{key} is not of type {str}')
         self.key = key
 
     def Setup(self):
@@ -25,10 +25,10 @@ class LLM_OpenAI(LLM_Adaptor):
             self.reply = ChatCompletion.create(
                 model="gpt-3.5-turbo", 
                 messages=[{"role": "user", "content": prompt}])
-        except Exception as e:
+        except Exception as unknown_e:
             self.reply = None
             #possible causes such as invalid API key
-            error(f'Error has been raised {e}')
+            error(f'An unknown error has been raised {unknown_e}')
         
     #TO DO: template or additional logic for interpreting the resposne from LLM to be further refactored
     def ParseResponse(self) -> str:
@@ -42,8 +42,10 @@ class LLM_OpenAI(LLM_Adaptor):
         try:
             #process the reply and set it back to None (not caching the responses)
             result = self.reply["choices"][0]["message"]["content"]
-        except Exception as e:
-            error(f'Error parsing the response {e}')
+        except KeyError as key_e:
+            error(f'Error parsing the response {key_e}')
+        except Exception as unknown_e:
+            error(f'Unknown error {unknown_e}')
             
         #clear the cached response
         self.reply = None

@@ -14,7 +14,7 @@ class AudioTranscriptionBySpeechRecognition(AudioTranscription):
             recognizer (Recognizer) : object required for transcribing audio data
         """
         if not isinstance(recognizer, Recognizer):
-            raise Exception(f'{recognizer} is not type of {Recognizer}')
+            raise TypeError(f'{recognizer} is not type of {Recognizer}')
         
         self.recognizer = recognizer
 
@@ -35,18 +35,18 @@ class AudioTranscriptionBySpeechRecognition(AudioTranscription):
         get_audio_data = kwargs.get('get_audio_data', None)
         process_transcript = kwargs.get('process_transcript', None)
         if not callable(get_audio_data):
-            raise Exception(f'{get_audio_data} is not callable')
+            raise TypeError(f'{get_audio_data} is not callable')
         if not callable(process_transcript):
-            raise Exception(f'{process_transcript} is not callable')
+            raise TypeError(f'{process_transcript} is not callable')
         if not isinstance(stop_event, Event):
-            raise Exception(f'{stop_event} is not type of {Event}')
+            raise TypeError(f'{stop_event} is not type of {Event}')
         
         while not stop_event.is_set():
             audio = get_audio_data()
             if (audio is None):
                 continue
             if not isinstance(audio, AudioData):
-                raise Exception(f'{audio} is not type of {AudioData}')
+                raise TypeError(f'{audio} is not type of {AudioData}')
             transcript = AudioTranscriptionBySpeechRecognition.TranscribeOnce(self.recognizer, audio)
             process_transcript(transcript)
 
@@ -66,13 +66,15 @@ class AudioTranscriptionBySpeechRecognition(AudioTranscription):
             text transcribed from audio data
         """
         if not isinstance(recognizer, Recognizer):
-            raise Exception(f'{recognizer} is not type of {Recognizer}')
+            raise TypeError(f'{recognizer} is not type of {Recognizer}')
         if not isinstance(audio, AudioData):
-            raise Exception(f'{audio} is not of type {AudioData}')
+            raise TypeError(f'{audio} is not of type {AudioData}')
         
         try:
             return recognizer.recognize_google(audio, language="en-US")
-        except UnknownValueError:
-            debug("Google Web Speech API could not understand the audio")
-        except RequestError as e:
-            error(f"Could not request results from Google Web Speech API {e}")
+        except UnknownValueError as unknown_value_e:
+            debug(f"Google Web Speech API could not understand the audio {unknown_value_e}")
+        except RequestError as request_e:
+            error(f"Could not request results from Google Web Speech API {request_e}")
+        except Exception as unknown_e:
+            error(f"Unknown error {unknown_e}")

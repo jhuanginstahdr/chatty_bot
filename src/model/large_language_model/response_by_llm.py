@@ -13,7 +13,7 @@ class ResponseByLLM(ResponseGenerator):
             llm_adaptor (LLM_Adaptor) : an instance of LLM_Adaptor that contains a specific large language model (e.g. openai, llama etc)
         """
         if not isinstance(llm_adaptor, LLM_Adaptor):
-            raise Exception(f'{llm_adaptor} is not of type {LLM_Adaptor}')
+            raise TypeError(f'{llm_adaptor} is not of type {LLM_Adaptor}')
         
         self.llm_adaptor = llm_adaptor
 
@@ -31,10 +31,10 @@ class ResponseByLLM(ResponseGenerator):
             return None
         
         if not isinstance(prompt, str):
-            raise Exception(f'{prompt} is not of type {str}')
+            raise TypeError(f'{prompt} is not of type {str}')
         
         info(f'Prompt: {prompt}')
-        #except exceptions to be handled within ConsumePrompt and ParseResponse
+        # exceptions to be handled within ConsumePrompt and ParseResponse
         self.llm_adaptor.ConsumePrompt(prompt)
         return self.llm_adaptor.ParseResponse()
     
@@ -53,11 +53,11 @@ class ResponseByLLM(ResponseGenerator):
         get_prompt = kwargs.get('get_prompt', None)
         process_response = kwargs.get('process_response', None)
         if not callable(get_prompt):
-            raise Exception(f'{get_prompt} is not callable')
+            raise TypeError(f'{get_prompt} is not callable')
         if not callable(process_response):
-            raise Exception(f'{process_response} is not callable')
+            raise TypeError(f'{process_response} is not callable')
         if not isinstance(stop_event, Event):
-            raise Exception(f'{stop_event} is not of type {Event}')
+            raise TypeError(f'{stop_event} is not of type {Event}')
         
         while not stop_event.is_set():
             prompt = get_prompt()
