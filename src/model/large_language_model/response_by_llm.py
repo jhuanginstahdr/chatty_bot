@@ -61,6 +61,7 @@ class ResponseByLLM(ResponseGenerator):
         
         while not stop_event.is_set():
             prompt = get_prompt()
+            prompt = f'{prompt} with 1 sentence per line'
             response = self.QueryOnce(prompt)
             process_response(response)
         

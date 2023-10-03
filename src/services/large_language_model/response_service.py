@@ -25,15 +25,17 @@ def CreateResponseService(
                 break
         if not list:
             return None
-        return " ".join(list)
+        prompt = " ".join(list)
+        return f'{prompt} with 1 sentence per line'
 
     # store the response from llm in text_q
-    def put_in_response_queue(text):
+    def put_in_response_queue(text : str):
         if not text:
             return
         info(f'response:\n{text}')
         try:
-            response_q.put(text)
+            for chunk in text.split('\n'):
+                response_q.put(chunk)
         except Full:
             error(f'cannot place item in {response_q}')
 
