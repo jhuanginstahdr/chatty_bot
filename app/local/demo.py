@@ -44,7 +44,7 @@ def multithreaded_demo() -> None:
 
     # setup for continuous speech transcription
     transcription = AudioTranscriptionBySpeechRecognition(recognizer)
-    transcription_thread = CreateAudioTranscriptionService(transcription, audio_q, query_q, stop_event)
+    transcription_thread = CreateAudioTranscriptionService(transcription, audio_q, query_q, response_q, stop_event)
     transcription_thread.start()
 
     # setup for continuous process with a language-model that provides responses to the queries

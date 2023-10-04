@@ -26,7 +26,7 @@ def CreateResponseService(
         if not list:
             return None
         prompt = " ".join(list)
-        return f'{prompt} with 1 sentence per line'
+        return f'with 1 sentence per line respond to the following:\n{prompt}'
 
     # store the response from llm in text_q
     def put_in_response_queue(text : str):

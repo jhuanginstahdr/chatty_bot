@@ -7,6 +7,7 @@ def CreateAudioTranscriptionService(
     transcript : AudioTranscription, 
     audio_q : Queue, 
     text_q : Queue, 
+    response_q : Queue,
     stop_event : Event) -> Thread:
 
     if not isinstance(transcript, AudioTranscription):
@@ -25,6 +26,8 @@ def CreateAudioTranscriptionService(
             return
         info(f'transcript: {text}')
         try:
+            while not response_q.empty():
+                response_q.get()
             text_q.put(text)
         except Full:
             error('cannot place item in queue')
