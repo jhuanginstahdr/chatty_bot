@@ -2,6 +2,8 @@ from speech_recognition import Recognizer, Microphone
 from threading import Event
 from queue import Queue
 from time import sleep
+from src.model.Events.custom_event import CustomEvent, CustomEventBus, GetEventName
+from threading import Thread
 
 from src.model.speech.audio_capture.capture_by_speech_recognition import AudioCaptureBySpeechRecognition
 from src.model.speech.audio_transcription.transcription_by_speech_recognition import AudioTranscriptionBySpeechRecognition
@@ -37,32 +39,43 @@ def multithreaded_demo() -> None:
     # store the response from language model
     response_q = Queue(1000)
 
+    event_bus = CustomEventBus()
+
     # setup for continuous audio capture
-    capture = AudioCaptureBySpeechRecognition(recognizer, Microphone())
-    capture_thread = CreateAudioCaptureService(capture, audio_q, stop_event)
-    capture_thread.start()
+    capture = AudioCaptureBySpeechRecognition(event_bus, recognizer, Microphone())
+    capture_thread = Thread(target=lambda: capture.EventLoop(stop_event))
+    
+    def show_transcription(event : CustomEvent):
+        if event.data is None:
+            return
+        from logging import info
+        info(f'transcript: {event.data}')
 
     # setup for continuous speech transcription
-    transcription = AudioTranscriptionBySpeechRecognition(recognizer)
-    transcription_thread = CreateAudioTranscriptionService(transcription, audio_q, query_q, stop_event)
+    transcription = AudioTranscriptionBySpeechRecognition(event_bus, recognizer)
+    event_bus.subscribe(GetEventName(capture.AudioCapturedEvent), transcription.AudioReceivedHandler)
+    event_bus.subscribe(GetEventName(transcription.AudioTranscribedEvent), show_transcription)
+    transcription_thread = Thread(target=lambda: transcription.EventLoop(stop_event))
+
     transcription_thread.start()
+    capture_thread.start()
 
-    # setup for continuous process with a language-model that provides responses to the queries
-    import os
-    openai_api_key = os.environ.get('OPENAI_API_KEY')
-    openai_llm = LLM_OpenAI(openai_api_key)
-    response = ResponseByLLM(openai_llm)
-    response_thread = CreateResponseService(response, query_q, response_q, stop_event)
-    response_thread.start()
+    # # setup for continuous process with a language-model that provides responses to the queries
+    # import os
+    # openai_api_key = os.environ.get('OPENAI_API_KEY')
+    # openai_llm = LLM_OpenAI(openai_api_key)
+    # response = ResponseByLLM(openai_llm)
+    # response_thread = CreateResponseService(response, query_q, response_q, stop_event)
+    # response_thread.start()
 
-    # setup for speech generation
-    import pyttsx3
-    engine = pyttsx3.init()
-    voices = engine.getProperty('voices')
-    engine.setProperty('voice', voices[1].id)
-    pttsx3_generator = SpeechGeneratorByPyttsx3(engine)
-    speech_generator_thread = CreateSpeechGenerationService(pttsx3_generator, response_q, stop_event)
-    speech_generator_thread.start()
+    # # setup for speech generation
+    # import pyttsx3
+    # engine = pyttsx3.init()
+    # voices = engine.getProperty('voices')
+    # engine.setProperty('voice', voices[1].id)
+    # pttsx3_generator = SpeechGeneratorByPyttsx3(engine)
+    # speech_generator_thread = CreateSpeechGenerationService(pttsx3_generator, response_q, stop_event)
+    # speech_generator_thread.start()
 
     try:
         while True:
@@ -73,5 +86,5 @@ def multithreaded_demo() -> None:
 
     capture_thread.join()
     transcription_thread.join()
-    response_thread.join()
-    speech_generator_thread.join()
+    #response_thread.join()
+    #speech_generator_thread.join()

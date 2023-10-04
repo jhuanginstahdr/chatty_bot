@@ -1,11 +1,13 @@
 from speech_recognition import Recognizer, AudioData, AudioSource, WaitTimeoutError
+from ...Events.custom_event import CustomEvent, CustomEventBus, EventDecorator, GetEventName
 from threading import Event
 from logging import info, error
 from .capture import AudioCapture
+from time import sleep
 
 class AudioCaptureBySpeechRecognition(AudioCapture):
 
-    def __init__(self, recognizer : Recognizer, audio_source : AudioSource):
+    def __init__(self, event_bus : CustomEventBus, recognizer : Recognizer, audio_source : AudioSource):
         """
         Cosntructs an AudioCapture object for capturing audio data using speech_recognition package
 
@@ -20,22 +22,13 @@ class AudioCaptureBySpeechRecognition(AudioCapture):
         
         self.recognizer = recognizer
         self.audio_source = audio_source
+        self.event_bus = event_bus
 
-    def Capture(self, stop_event : Event, **kwargs) -> None:
-        """
-        Continuous audio capture that feeds audio data to process_audio in a loop. The
-        loop ends when the stop_event is set. 
+    @EventDecorator('AudioCapturedEvent')
+    def AudioCapturedEvent(self, audio : AudioData) -> None:
+        self.event_bus.publish(CustomEvent(GetEventName(self.AudioCapturedEvent), audio))
 
-        Args:
-            process_audio (method) : provided process on top of the captured audio data
-            stop_event (Event) : mechanism that stops the continuous capture
-
-        Returns:
-            None
-        """
-        process_audio = kwargs.get('process_audio', None)
-        if not callable(process_audio):
-            raise TypeError(f'{process_audio} is not callable')
+    def EventLoop(self, stop_event : Event):
         if not isinstance(stop_event, Event):
             raise TypeError(f'{stop_event} is not of type {Event}')
         
@@ -44,9 +37,12 @@ class AudioCaptureBySpeechRecognition(AudioCapture):
         self.recognizer.adjust_for_ambient_noise(source)
         while not stop_event.is_set():
             audio = AudioCaptureBySpeechRecognition.CaptureOnce(self.recognizer, source)
-            process_audio(audio)
+            self.AudioCapturedEvent(audio)
 
         info(f'exited audio capturing loop')
+
+    def Capture(self, stop_event : Event, **kwargs) -> None:
+        pass
 
     @staticmethod
     def CaptureOnce(recognizer : Recognizer, source : AudioSource) -> AudioData:

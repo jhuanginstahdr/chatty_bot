@@ -1,11 +1,13 @@
 from speech_recognition import Recognizer, AudioData, UnknownValueError, RequestError
+from ...Events.custom_event import CustomEvent, CustomEventBus, EventDecorator, GetEventName
 from threading import Event
 from logging import debug, error, info
 from .transcription import AudioTranscription
+from time import sleep
 
 class AudioTranscriptionBySpeechRecognition(AudioTranscription):
 
-    def __init__(self, recognizer : Recognizer):
+    def __init__(self, event_bus : CustomEventBus, recognizer : Recognizer):
         """
         Constructs an object of AudioTranscription that transcribes audio data by
         functions provided in speech_recognition package
@@ -17,41 +19,34 @@ class AudioTranscriptionBySpeechRecognition(AudioTranscription):
             raise TypeError(f'{recognizer} is not type of {Recognizer}')
         
         self.recognizer = recognizer
+        self.event_bus = event_bus
+    
+    @EventDecorator('AudioTranscribedEvent')
+    def AudioTranscribedEvent(self, transcript : str) -> None:
+        self.event_bus.publish(CustomEvent(GetEventName(self.AudioTranscribedEvent), transcript))
 
-    def Transcribe(self, stop_event : Event, **kwargs) -> None:
-        """
-        Continuous audio transcription in a loop where the loop ends when the stop_event is set.
-        The audio data for transcription is consumed from get_audio_data function and the result
-        of the transcription is consumed by process_transcript method
+    def AudioReceivedHandler(self, event : CustomEvent):
+        if not isinstance(event, CustomEvent):
+            raise TypeError(f'{event} is not type of {CustomEvent}')
+        audio = event.data
+        if not isinstance(audio, AudioData):
+            raise TypeError(f'{audio} is not type of {AudioData}')
+        transcript = AudioTranscriptionBySpeechRecognition.TranscribeOnce(self.recognizer, audio)
+        self.AudioTranscribedEvent(transcript)
 
-        Args:
-            get_audio_data (function) : responsible for returning audio data for transcription
-            process_transcript (method) : responsible for consuming transcript
-            stop_event (Event) : mechanism that stops the continuous transcription
+    def EventLoop(self, stop_event : Event):
 
-        Returns:
-            None
-        """
-        get_audio_data = kwargs.get('get_audio_data', None)
-        process_transcript = kwargs.get('process_transcript', None)
-        if not callable(get_audio_data):
-            raise TypeError(f'{get_audio_data} is not callable')
-        if not callable(process_transcript):
-            raise TypeError(f'{process_transcript} is not callable')
         if not isinstance(stop_event, Event):
             raise TypeError(f'{stop_event} is not type of {Event}')
         
         while not stop_event.is_set():
-            audio = get_audio_data()
-            if (audio is None):
-                continue
-            if not isinstance(audio, AudioData):
-                raise TypeError(f'{audio} is not type of {AudioData}')
-            transcript = AudioTranscriptionBySpeechRecognition.TranscribeOnce(self.recognizer, audio)
-            process_transcript(transcript)
+            # looping to capture events
+            sleep(0.5)
 
         info(f'exited audio transcription loop')
 
+    def Transcribe(self, stop_event : Event, **kwargs) -> None:
+        pass
 
     @staticmethod
     def TranscribeOnce(recognizer : Recognizer, audio : AudioData) -> str:
